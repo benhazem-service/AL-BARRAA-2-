@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>âš™ Ø¥Ø¯Ø§Ø±Ø© Ø§Ù„Ù†Ø¸Ø§Ù… Ø§Ù„ØªØ¹Ù„ÙŠÙ…ÙŠ</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Feather Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
+    <!-- Firebase SDKs (v8) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-analytics.js"></script>
+    <!-- Ø®Ø· ØªØ¬ÙˆØ§Ù„ Ù…Ù† Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- الأنماط المخصصة -->
+    <link rel="stylesheet" href="css/style.css">
+    <script>
+        function openDataRecoveryModal() {
+            if (window._openDataRecoveryModalImpl) return window._openDataRecoveryModalImpl();
+            const m = document.getElementById('dataRecoveryModal');
+            if (m) m.classList.remove('hidden');
+            if (typeof scanAllDataSources === 'function') scanAllDataSources();
+        }
+        function closeDataRecoveryModal() {
+            if (window._closeDataRecoveryModalImpl) return window._closeDataRecoveryModalImpl();
+            const m = document.getElementById('dataRecoveryModal');
+            if (m) m.classList.add('hidden');
+        }
+    </script>
+</head>
+<body class="bg-gray-100 min-h-screen rtl">
+
+    <!-- ===== شاشة تسجيل الدخول ===== -->
+    <div id="loginOverlay">
+        <div class="login-card">
+            <div class="text-center mb-7">
+                <div class="text-5xl mb-3">📚</div>
+                <h2 class="text-2xl font-bold text-white">النظام التعليمي</h2>
+                <p class="text-indigo-200 text-sm mt-1">أدخل بيانات الدخول للمتابعة</p>
+            </div>
+            <div class="flex flex-col gap-4">
+                <div>
+                    <label class="text-indigo-200 text-sm block mb-1">رقم الهاتف</label>
+                    <input id="loginPhone" type="tel" placeholder="0600000000" class="login-input"
+                        autocomplete="username">
+                </div>
+                <div>
+                    <label class="text-indigo-200 text-sm block mb-1">كلمة السر</label>
+                    <input id="loginPassword" type="password" placeholder="••••••••" class="login-input"
+                        autocomplete="current-password">
+                </div>
+                <p id="loginError" class="login-error"></p>
+                <button id="loginBtn" class="login-btn">
+                    <span id="loginBtnText">تسجيل الدخول</span>
+                </button>
+            </div>
+            <p class="text-center text-indigo-300 text-xs mt-6 opacity-60">النظام التعليمي © 2026</p>
+        </div>
+    </div>
+
+    <!-- ===== مودال إدارة الحسابات (للأدمن) ===== -->
+    <div id="adminModal" class="hidden">
+        <div class="admin-modal-content">
+            <div
+                class="bg-gradient-to-l from-indigo-600 to-purple-700 p-5 rounded-t-xl flex justify-between items-center">
+                <h2 class="text-white text-xl font-bold">⚙️ لوحة إدارة الحسابات</h2>
+                <button onclick="document.getElementById('adminModal').classList.add('hidden')"
+                    class="text-white hover:text-indigo-200 text-2xl font-bold leading-none">&times;</button>
+            </div>
+            <div class="p-5">
+                <!-- نموذج إضافة / تعديل حساب -->
+                <div class="bg-indigo-50 rounded-xl p-4 mb-5">
+                    <h3 id="accountFormTitle" class="font-bold text-indigo-700 mb-3">➕ إضافة حساب جديد</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-sm text-gray-600 block mb-1">الاسم الكامل</label>
+                            <input id="accName" type="text" placeholder="مثال: محمد أحمد"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 text-sm">
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-600 block mb-1">رقم الهاتف (معرّف الدخول)</label>
+                            <input id="accPhone" type="tel" placeholder="0600000000" dir="ltr"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 text-sm">
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-600 block mb-1">كلمة السر</label>
+                            <input id="accPassword" type="text" placeholder="اتركه فارغاً لعدم التغيير"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 text-sm">
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-600 block mb-1">اسم المؤسسة (في النتيجة)</label>
+                            <textarea id="accInstitution" rows="2" placeholder="يمكن كتابة سطرين"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 text-sm"></textarea>
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-600 block mb-1">المستويات المسموح بها</label>
+                            <div id="accLevelsCheckboxes"
+                                class="flex flex-wrap gap-2 p-2 border border-gray-300 rounded-lg bg-white min-h-10">
+                                <span class="text-gray-400 text-xs">سيتم تحميل المستويات...</span>
+                            </div>
+                        </div>
+                    </div>
+                    <input id="accEditingPhone" type="hidden" value="">
+                    <div class="flex gap-2 mt-3">
+                        <button id="accSaveBtn" onclick="saveAccount()"
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg text-sm font-bold">💾
+                            حفظ</button>
+                        <button id="accCancelBtn" onclick="cancelAccountEdit()"
+                            class="hidden bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm">إلغاء</button>
+                    </div>
+                </div>
+
+                <!-- قسم تحديد وتوزيع التلاميذ غير المحددة أقسامهم -->
+                <div id="adminUnassignedSection" class="bg-amber-50/80 border border-amber-200 rounded-xl p-4 mb-5 shadow-xs">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="font-bold text-amber-900 text-sm flex items-center gap-1.5">
+                            <span>🏫</span>
+                            <span>تحديد أقسام التلاميذ (غير المحددة أقسامهم)</span>
+                        </h3>
+                        <span id="adminUnassignedBadge" class="text-xs px-2.5 py-0.5 rounded-full font-bold bg-amber-200 text-amber-900">0 تلميذ</span>
+                    </div>
+                    <p class="text-xs text-amber-700 mb-3">يمكنك من هنا تحديد وتعيين الأقسام لجميع التلاميذ الذين لم يتم تعيين أقسام لهم بعد:</p>
+                    <div id="adminUnassignedList" class="space-y-2 max-h-56 overflow-y-auto pr-1">
+                        <!-- قائمة التلاميذ غير المحددة أقسامهم ستظهر هنا -->
+                    </div>
+                </div>
+
+                <!-- قائمة الحسابات -->
+                <h3 class="font-bold text-gray-700 mb-2">📋 قائمة الحسابات</h3>
+                <div id="accountsList" class="space-y-2">
+                    <p class="text-gray-400 text-sm text-center py-4">جاري التحميل...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== مودال التصدير ===== -->
+    <div id="exportModal"
+        class="hidden fixed inset-0 z-[1000] bg-black bg-opacity-60 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl w-full max-w-sm overflow-hidden shadow-2xl transform transition-all">
+            <div class="bg-indigo-600 p-4 flex justify-between items-center">
+                <h2 class="text-white text-lg font-bold">💾 خيارات التصدير</h2>
+                <button onclick="document.getElementById('exportModal').classList.add('hidden')"
+                    class="text-white hover:text-indigo-200 text-2xl leading-none">&times;</button>
+            </div>
+            <div class="p-5 flex flex-col gap-3">
+                <button onclick="exportAll()"
+                    class="bg-indigo-100 hover:bg-indigo-200 text-indigo-800 font-bold py-3 rounded-lg w-full transition-colors">📦
+                    تصدير كل البيانات</button>
+                <button onclick="exportImages()"
+                    class="bg-teal-100 hover:bg-teal-200 text-teal-800 font-bold py-3 rounded-lg w-full transition-colors">🖼️
+                    تصدير الصور فقط</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== مودال الاستيراد ===== -->
+    <div id="importModal"
+        class="hidden fixed inset-0 z-[1000] bg-black bg-opacity-60 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl w-full max-w-sm overflow-hidden shadow-2xl transform transition-all">
+            <div class="bg-gray-600 p-4 flex justify-between items-center">
+                <h2 class="text-white text-lg font-bold">📂 خيارات الاستيراد</h2>
+                <button onclick="document.getElementById('importModal').classList.add('hidden')"
+                    class="text-white hover:text-gray-200 text-2xl leading-none">&times;</button>
+            </div>
+            <div class="p-5 flex flex-col gap-3">
+                <button onclick="document.getElementById('importAllInput').click()"
+                    class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-3 rounded-lg w-full transition-colors">📦
+                    استيراد كل البيانات (استبدال)</button>
+                <button onclick="document.getElementById('importImagesInput').click()"
+                    class="bg-teal-100 hover:bg-teal-200 text-teal-800 font-bold py-3 rounded-lg w-full transition-colors">🖼️
+                    استيراد الصور فقط (دمج)</button>
+
+                <input type="file" id="importAllInput" accept=".json" class="hidden" onclick="this.value=null" onchange="importAll(event)">
+                <input type="file" id="importImagesInput" accept=".json" class="hidden" onclick="this.value=null" onchange="importImages(event)">
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== مودال استرجاع البيانات السابقة ===== -->
+    <div id="dataRecoveryModal"
+        class="hidden fixed inset-0 z-[1000] bg-black bg-opacity-60 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl w-full max-w-2xl overflow-hidden shadow-2xl transform transition-all">
+            <div class="bg-gradient-to-l from-amber-600 to-orange-700 p-4 flex justify-between items-center text-white">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">🔍</span>
+                    <div>
+                        <h2 class="text-lg font-bold">فاحص واسترجاع البيانات السابقة</h2>
+                        <p class="text-xs text-amber-100">فحص تلقائي لمخازن المتصفح والسحابة لاستعادة بيانات التلاميذ والأقسام</p>
+                    </div>
+                </div>
+                <button onclick="closeDataRecoveryModal()"
+                    class="text-white hover:text-amber-200 text-2xl leading-none">&times;</button>
+            </div>
+            <div class="p-5 max-h-[70vh] overflow-y-auto">
+                <!-- خيار استرجاع من ملف محلي -->
+                <div class="bg-indigo-50 border border-indigo-200/80 rounded-xl p-3.5 mb-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-right">
+                    <div>
+                        <p class="text-xs font-bold text-indigo-900">هل لديك ملف نسخ احتياطي محفوظ في جهازك؟</p>
+                        <p class="text-[11px] text-indigo-700">يمكنك رفع ملف JSON لاسترجاع جميع التلاميذ والأقسام فوراً وتثبيتها</p>
+                    </div>
+                    <button type="button" onclick="document.getElementById('recoveryFileInput').click()"
+                        class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-xs font-bold shrink-0 shadow-sm flex items-center gap-1.5 transition-btn">
+                        📁 اختيار ملف النسخة الاحتياطية
+                    </button>
+                    <input type="file" id="recoveryFileInput" accept=".json" class="hidden" onclick="this.value=null" onchange="handleRecoveryFile(event)">
+                </div>
+
+                <div class="flex justify-between items-center mb-3">
+                    <p class="text-sm text-gray-700 font-bold">النسخ التي تم العثور عليها في المتصفح والسحابة:</p>
+                    <button onclick="scanAllDataSources()"
+                        class="bg-amber-100 hover:bg-amber-200 text-amber-900 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1">
+                        🔄 إعادة الفحص الشامل
+                    </button>
+                </div>
+                <div id="recoveryList" class="space-y-3">
+                    <p class="text-gray-400 text-sm text-center py-4">جاري الفحص...</p>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-5 py-3 border-t border-gray-200 flex justify-between items-center">
+                <span class="text-xs text-gray-500">اختر النسخة واضغط "استرجاع وتثبيت لحسابي"</span>
+                <button onclick="closeDataRecoveryModal()"
+                    class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- خلفية تعتيم للشاشات الصغيرة عند فتح القائمة الجانبية -->
+    <div id="sidebarBackdrop" onclick="toggleMobileSidebar()"
+        class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-40 lg:hidden hidden transition-opacity"></div>
+
+    <!-- ===== الشريط الجانبي العمودي الأيمن (Clean Minimal Light Sidebar) ===== -->
+    <aside id="sidebar"
+        class="fixed top-0 right-0 bottom-0 w-64 xl:w-72 bg-white border-l border-slate-200/80 z-50 flex flex-col justify-between transition-transform duration-300 ease-in-out translate-x-full lg:translate-x-0 shadow-xl lg:shadow-xs">
+        <div>
+            <!-- ترويسة الشريط: الشعار وعنوان البرنامج -->
+            <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center text-white shadow-md shadow-indigo-100 text-lg">
+                        📚
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-slate-900 text-base leading-tight">النظام التعليمي</h1>
+                        <p class="text-xs text-slate-400 font-medium">مؤسسة البراءة الخاصة</p>
+                    </div>
+                </div>
+                <!-- زر إغلاق القائمة في الموبايل -->
+                <button onclick="toggleMobileSidebar()" class="lg:hidden text-slate-400 hover:text-slate-600 p-1 rounded-lg">
+                    <i data-feather="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- بطاقة المستخدم وحالة السحابة والسنة المثبتة -->
+            <div class="p-3 mx-3 my-3 bg-slate-50 border border-slate-100 rounded-2xl flex flex-col gap-2">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <div
+                            class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-xs border border-indigo-200">
+                            👤
+                        </div>
+                        <div class="overflow-hidden">
+                            <p id="sidebarUserName" class="font-bold text-xs text-slate-800 truncate">المدير</p>
+                            <div class="flex items-center gap-1 mt-0.5">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                <span class="text-[10px] text-slate-500 font-medium">سحابة متصلة</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="pt-2 border-t border-slate-200/60 flex items-center justify-between text-[11px]">
+                    <span class="text-slate-500 font-medium">السنة المثبتة:</span>
+                    <span id="sidebarAcademicYear" class="font-extrabold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">2025/2026</span>
+                </div>
+            </div>
+
+            <!-- قائمة التنقل العمودية (تحويل البطاقات إلى أزرار وصول مباشر) -->
+            <div class="px-3 space-y-1 overflow-y-auto max-h-[calc(100vh-270px)]">
+                <p class="px-3 pt-2 pb-1 text-[11px] font-bold text-slate-400 uppercase tracking-wider">لوحة التحكم</p>
+
+                <!-- الرئيسية والنتائج -->
+                <button id="navHomeBtn" onclick="switchToHomePage()" class="sidebar-item active">
+                    <div class="flex items-center gap-3">
+                        <i data-feather="layout" class="w-4 h-4 text-indigo-600"></i>
+                        <span>الرئيسية والنتائج</span>
+                    </div>
+                </button>
+
+                <!-- قائمة التلاميذ مع العداد الحي -->
+                <button id="totalStudentsCard" class="sidebar-item" title="عرض لائحة التلاميذ">
+                    <div class="flex items-center gap-3">
+                        <i data-feather="users" class="w-4 h-4 text-emerald-600"></i>
+                        <span>قائمة التلاميذ</span>
+                    </div>
+                    <span id="totalStudents" class="badge-counter">0</span>
+                </button>
+
+                <!-- تسجيل الغياب -->
+                <button id="absenceCard" class="sidebar-item" title="تسجيل وتتبع غياب التلاميذ">
+                    <div class="flex items-center gap-3">
+                        <i data-feather="user-x" class="w-4 h-4 text-rose-500"></i>
+                        <span>تسجيل الغياب</span>
+                    </div>
+                </button>
+
+                <!-- أداء الواجبات الشهرية -->
+                <button id="monthlyPerformanceCard" class="sidebar-item" title="متابعة الواجبات الشهرية">
+                    <div class="flex items-center gap-3">
+                        <i data-feather="check-square" class="w-4 h-4 text-blue-600"></i>
+                        <span>الواجبات الشهرية</span>
+                    </div>
+                </button>
+
+                <!-- ترتيب الأوائل -->
+                <button id="rankingCard" class="sidebar-item" title="ترتيب الأوائل والمراكز">
+                    <div class="flex items-center gap-3">
+                        <i data-feather="award" class="w-4 h-4 text-amber-500"></i>
+                        <span>ترتيب الأوائل</span>
+                    </div>
+                </button>
+
+                <p class="px-3 pt-4 pb-1 text-[11px] font-bold text-slate-400 uppercase tracking-wider">الإدارة والتهيئة</p>
+
+                <!-- إعدادات النظام -->
+                <button id="openSettings" class="sidebar-item" title="إعدادات النظام والسنوات">
+                    <div class="flex items-center gap-3">
+                        <i data-feather="settings" class="w-4 h-4 text-slate-600"></i>
+                        <span>إعدادات النظام</span>
+                    </div>
+                </button>
+
+                <!-- إدارة الحسابات (أدمن فقط) -->
+                <button id="adminCard" onclick="openAdminPanel()" class="sidebar-item hidden" title="إدارة المستخدمين">
+                    <div class="flex items-center gap-3">
+                        <i data-feather="shield" class="w-4 h-4 text-purple-600"></i>
+                        <span>إدارة الحسابات</span>
+                    </div>
+                </button>
+
+                <!-- فحص واسترجاع البيانات -->
+                <button id="recoveryBtn" onclick="openDataRecoveryModal()" class="sidebar-item" title="فحص واسترجاع البيانات السابقة">
+                    <div class="flex items-center gap-3">
+                        <i data-feather="refresh-cw" class="w-4 h-4 text-amber-600"></i>
+                        <span>استرجاع البيانات</span>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- أسفل الشريط الجانبي: تسجيل الخروج -->
+        <div class="p-3 border-t border-slate-100">
+            <button id="logoutBtn" onclick="logoutUser()"
+                class="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-rose-600 hover:bg-rose-50 text-xs font-bold transition-all border border-transparent hover:border-rose-100">
+                <i data-feather="log-out" class="w-4 h-4"></i>
+                <span>تسجيل الخروج</span>
+            </button>
+            <p class="text-center text-[10px] text-slate-400 mt-2 font-medium">نظام البراءة التعليمي © 2026</p>
+        </div>
+    </aside>
+
+    <!-- ===== حاوية المحتوى الرئيسي (Main Content Wrapper) ===== -->
+    <div class="main-wrapper min-h-screen flex flex-col lg:mr-64 xl:mr-72 transition-all duration-300">
+
+        <!-- الشريط العلوي (Top Header Bar) -->
+        <header id="topHeader"
+            class="bg-white/95 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-30 px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
+            
+            <!-- الجانب الأيمن: زر القائمة في الموبايل + عنوان الشاشة -->
+            <div class="flex items-center gap-3">
+                <button onclick="toggleMobileSidebar()" class="lg:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors">
+                    <i data-feather="menu" class="w-5 h-5"></i>
+                </button>
+                <div>
+                    <h2 id="topBarPageTitle" class="font-bold text-slate-800 text-sm sm:text-base">لوحة التحكم والنتائج</h2>
+                    <p class="text-[11px] text-slate-400 hidden sm:block">إدارة بطاقات التلاميذ والتقارير الدراسية</p>
+                </div>
+            </div>
+
+            <!-- الجانب الأيسر: محدد السنة الدراسية + حالة المزامنة + أدوات التصدير والاستيراد -->
+            <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+                <!-- محدد السنة الدراسية -->
+                <div id="yearSelectorBox" class="flex items-center bg-slate-50 border border-slate-200 rounded-xl p-1 shadow-2xs">
+                    <button id="prevYearBtn" title="السنة السابقة"
+                        class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white text-slate-600 text-xs font-bold transition-colors disabled:opacity-30">◀</button>
+                    <select id="academicYearSelect"
+                        class="bg-transparent text-xs sm:text-sm font-bold text-indigo-700 px-2 py-0.5 focus:outline-none cursor-pointer"></select>
+                    <button id="nextYearBtn" title="السنة التالية"
+                        class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white text-slate-600 text-xs font-bold transition-colors disabled:opacity-30">▶</button>
+                </div>
+
+                <!-- مؤشر المزامنة السحابية -->
+                <div id="cloudStatus"
+                    class="hidden text-xs font-medium px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50"></div>
+
+                <!-- أزرار التصدير والاستيراد السريعة -->
+                <div class="flex items-center gap-1.5">
+                    <button id="exportBtn"
+                        class="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-bold transition-colors flex items-center gap-1">
+                        <i data-feather="download" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">تصدير</span>
+                    </button>
+                    <button id="importBtn"
+                        class="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-bold transition-colors flex items-center gap-1">
+                        <i data-feather="upload" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">استيراد</span>
+                    </button>
+                </div>
+
+                <!-- اسم المستخدم في الشريط العلوي -->
+                <span id="headerUserName" class="hidden text-xs font-bold text-indigo-700 bg-indigo-50 px-3 py-1.5 rounded-xl border border-indigo-100"></span>
+            </div>
+        </header>
+
+        <!-- مساحة العمل الرئيسية -->
+        <main class="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
+            <!-- عنصر غير مرئي لدعم أي مراجع قديمة لـ statsSection و statsGrid دون أخطاء -->
+            <div id="statsSection" class="hidden"><div id="statsGrid"></div></div>
+
+            <!-- Main Home Section -->
+            <section id="homePage" class="space-y-6">
+                <!-- بطاقة الترحيب العصرية المتجاوبة لجميع الشاشات مع الصورة المتكيفة -->
+                <div class="bg-gradient-to-l from-indigo-50/80 via-white to-slate-50 border border-slate-200/80 rounded-2xl p-5 sm:p-7 shadow-xs flex flex-col-reverse md:flex-row items-center justify-between gap-6 text-right">
+                    <div class="space-y-2.5 max-w-xl">
+                        <div class="inline-flex items-center gap-2 bg-indigo-100/70 text-indigo-700 text-xs font-bold px-3 py-1 rounded-full border border-indigo-200/50">
+                            <span>✨ مرحباً بك في مساحة الإدارة</span>
+                        </div>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">النظام التعليمي الشامل</h2>
+                        <div id="homeGreeting" class="text-sm sm:text-base text-slate-600 font-medium"></div>
+                        <p class="text-xs sm:text-sm text-slate-500 leading-relaxed">
+                            قم باختيار القسم والتلميذ من القوائم لتحرير وطباعة بطاقة النتيجة، أو استخدم الشريط الجانبي الأيمن للوصول المباشر إلى تتبع الغياب، الواجبات الشهرية، وترتيب الأوائل.
+                        </p>
+                    </div>
+                    <div class="shrink-0 flex items-center justify-center p-3 sm:p-4 rounded-2xl bg-gradient-to-br from-indigo-100/70 via-purple-50 to-indigo-50 border border-indigo-200/60 shadow-inner">
+                        <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" 
+                             alt="شعار النظام التعليمي" 
+                             class="w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 max-w-full h-auto object-contain drop-shadow-md hover:scale-105 transition-transform duration-300"
+                             onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
+                        <div class="hidden text-5xl sm:text-6xl p-2 select-none">🎓</div>
+                    </div>
+                </div>
+
+                <!-- بطاقات اختيار القسم والتلميذ والمعلومات السريعة (Clean Minimal) -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-right">
+                    <!-- اختيار القسم -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:border-indigo-300 transition-all">
+                        <div class="flex items-center gap-2 mb-2 text-indigo-700 font-bold text-sm">
+                            <span class="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs">🏫</span>
+                            <h3>اختيار القسم / المستوى</h3>
+                        </div>
+                        <select id="homeDeptSelect"
+                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all cursor-pointer">
+                            <option value="">-- اختر القسم --</option>
+                        </select>
+                    </div>
+
+                    <!-- اختيار التلميذ -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:border-emerald-300 transition-all">
+                        <div class="flex items-center gap-2 mb-2 text-emerald-700 font-bold text-sm">
+                            <span class="w-6 h-6 rounded-lg bg-emerald-50 flex items-center justify-center text-xs">👨‍🎓</span>
+                            <h3>اختيار التلميذ</h3>
+                        </div>
+                        <select id="homeStudentSelect"
+                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all cursor-pointer">
+                            <option value="">-- اختر تلميذ --</option>
+                        </select>
+                        <p id="homeStudentCount" class="text-xs mt-2 text-slate-500 font-medium"></p>
+                    </div>
+
+                    <!-- معلومات سريعة -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:border-amber-300 transition-all">
+                        <div class="flex items-center gap-2 mb-2 text-amber-700 font-bold text-sm">
+                            <span class="w-6 h-6 rounded-lg bg-amber-50 flex items-center justify-center text-xs">📋</span>
+                            <h3>معلومات سريعة</h3>
+                        </div>
+                        <div id="homeStudentInfo" class="text-xs text-slate-600 leading-relaxed min-h-[42px] flex items-center">
+                            <span class="text-slate-400 italic">اختر تلميذاً لعرض تفاصيله</span>
+                        </div>
+                    </div>
+                </div>
+
+            <!-- قسم عرض بيانات التلميذ والدورات -->
+            <div id="studentDisplaySection" class="hidden mt-6">
+                <div class="flex justify-between items-center mb-3">
+                    <div id="tableDeptLabel" class="text-indigo-700 font-semibold text-lg"></div>
+                    <button id="clearSelection" class="text-sm text-gray-600 hover:text-indigo-600">إلغاء
+                        التحديد</button>
+                </div>
+
+                <!-- قسم النتيجة المدرسية الجديد -->
+                <div id="newReportCard" class="mt-4">
+                    <div class="flex flex-wrap justify-center items-center gap-4 mb-4 print:hidden">
+                        <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg"
+                            onclick="printNewReport()">🖨 طباعة</button>
+                        <button class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg"
+                            onclick="printAllLevelReports()">🖨 طباعة نتائج القسم كاملاً</button>
+                        <button id="toggleLockImagesBtn"
+                            class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg">🔒 تثبيت
+                            الصور</button>
+
+                        <div class="flex flex-col items-center gap-2">
+                            <label
+                                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg cursor-pointer text-center"
+                                for="imageInput">📷 إدراج صورة</label>
+                        </div>
+
+                        <input type="file" id="imageInput" accept="image/png, image/jpeg, image/gif" class="hidden">
+
+                        <button id="toggleShowImagesBtn" onclick="toggleImagesVisibility()"
+                            class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">👁 إخفاء
+                            الصور</button>
+
+                        <select id="reportSessionSelect"
+                            class="px-3 py-2 border rounded-lg bg-white focus:ring-2 focus:ring-indigo-500"></select>
+                    </div>
+
+                    <!-- حاوية متجاوبة للتمرير الأفقي في الشاشات الصغيرة للمحافظة على أبعاد ورقة A4 -->
+                    <div class="w-full overflow-x-auto pb-4 pt-1 flex justify-center">
+                        <div class="page" id="sheet">
+                            <h2 id="reportCardTitle" style="text-align:center; color:#2fb57f;">نموذج النتائج الدراسية
+                            </h2>
+
+                        <div
+                            style="display:flex; justify-content: space-between; align-items: flex-start; margin-bottom:12px; border-bottom: 2px solid #2fb57f; padding-bottom: 12px;">
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; flex-grow: 1;">
+                                <div><strong>المؤسسة:</strong>
+                                    <div data-field="institution" placeholder="اسم المدرسة"
+                                        style="border-bottom: 1px dotted #ccc; min-height: 18px;"></div>
+                                </div>
+                                <div><strong>المستوى:</strong>
+                                    <div contenteditable class="editable" data-field="level"
+                                        placeholder="المستوى الدراسي"></div>
+                                </div>
+                                <div><strong>السنة الدراسية:</strong>
+                                    <div contenteditable class="editable" data-field="academicYear"
+                                        placeholder="2025 / 2024"></div>
+                                </div>
+                                <div><strong>اسم الطفل(ة):</strong>
+                                    <div contenteditable class="editable" data-field="studentName"
+                                        placeholder="الاسم الكامل"></div>
+                                </div>
+                            </div>
+                            <div style="margin-right: 20px;">
+                                <img id="reportCardStudentImage"
+                                    src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="صورة التلميذ"
+                                    style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px; border: 2px solid #ddd;">
+                            </div>
+                        </div>
+
+                        <h3
+                            style="background: #2fb57f; color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 16px; margin-bottom: 10px;">
+                            تقييم الأنشطة / المواظبة و السلوك</h3>
+                        <table class="main-report-table"
+                            style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                            <thead>
+                                <tr style="background-color: #f3f4f6;">
+                                    <th style="width:20%; border: 1px solid #ddd; padding: 8px;">المجال</th>
+                                    <th style="width:35%; border: 1px solid #ddd; padding: 8px;">النشاط </th>
+                                    <th style="width:15%; border: 1px solid #ddd; padding: 8px;">التقدير</th>
+                                    <th style="width:30%; border: 1px solid #ddd; padding: 8px;">الملاحظات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reportActivitiesBody">
+                                <!-- سيتم ملء هذا القسم ديناميكياً -->
+                            </tbody>
+                        </table>
+
+                        <h3
+                            style="background: #4f46e5; color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 16px; margin-top: 15px; margin-bottom: 10px;">
+                            التقدير الإجمالي </h3>
+                        <p class="print:hidden"
+                            style="font-size:12px; color:#6b7280; margin-bottom:6px; text-align:right;">
+                            ✏️ يمكنك تعديل معدل أي مرحلة يدوياً بالنقر على الخانة. المعدلات المعدّلة تظهر باللون الأصفر.
+                            انقر ↺ للرجوع للحساب التلقائي.
+                        </p>
+                        <table
+                            style="width: 100%; border-collapse: collapse; text-align: center; font-size: 14px; margin-bottom: 15px;">
+                            <thead id="finalGradesHeader">
+                                <!-- رؤوس الأعمدة للدورات ستضاف هنا -->
+                            </thead>
+                            <tbody id="finalGradesBody">
+                                <!-- خلايا المعدلات ستضاف هنا -->
+                            </tbody>
+                        </table>
+
+                        <table
+                            style="width: 100%; border-collapse: collapse; text-align: center; font-size: 14px; margin-bottom: 20px;">
+                            <tr style="background-color: #f3f4f6;">
+                                <th colspan="4" style="border: 1px solid #ddd; padding: 8px;">قرار نتائج الدورة</th>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid #ddd; padding: 8px;"><label><input type="checkbox"
+                                            data-field="award_commendation" class="award-cb"> تنويه</label></td>
+                                <td style="border: 1px solid #ddd; padding: 8px;"><label><input type="checkbox"
+                                            data-field="award_encouragement" class="award-cb"> تشجيع</label></td>
+                                <td style="border: 1px solid #ddd; padding: 8px;"><label><input type="checkbox"
+                                            data-field="award_honor" class="award-cb"> لوحة الشرف</label></td>
+                                <td style="border: 1px solid #ddd; padding: 8px;"><label><input type="checkbox"
+                                            data-field="award_warning" class="award-cb"> تنبيه</label></td>
+                            </tr>
+                        </table>
+
+                        <table
+                            style="width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 25px; border: 1px solid #ddd;">
+                            <tr>
+                                <td style="width: 33%; padding: 8px; vertical-align: top;">
+                                    <strong>ملاحظات الأستاذ(ة)المربي(ة):</strong>
+                                    <div class="mt-2">
+                                        <select data-field="teacher_notes_select"
+                                            class="w-full border-gray-300 rounded-md p-1 report-note-select"></select>
+                                        <textarea data-field="teacher_notes_custom"
+                                            class="hidden w-full border-gray-300 rounded-md p-1 mt-2"
+                                            placeholder="اكتب ملاحظتك المخصصة هنا..."></textarea>
+                                    </div>
+                                </td>
+                                <td style="width: 33%; padding: 8px; vertical-align: top;"><strong>الغياب:</strong>
+                                    <div style="margin-top: 5px;">مبرر: <span data-field="absences_justified"
+                                            style="display: inline-block; min-width: 30px; font-weight: bold; color: #16a34a;">0</span>
+                                    </div>
+                                    <div style="margin-top: 5px;">غير مبرر: <span data-field="absences_unjustified"
+                                            style="display: inline-block; min-width: 30px; font-weight: bold; color: #dc2626;">0</span>
+                                    </div>
+                                </td>
+                                <td style="width: 33%; padding: 8px; text-align: center; vertical-align: top;">
+                                    <strong>طابع وتوقيع الإدارة</strong>
+                                    <div style="height: 60px; margin-top: 5px;"></div>
+                                </td>
+                            </tr>
+                        </table>
+                        </div> <!-- نهاية حاوية التمرير المتجاوبة لورقة النتيجة -->
+                    </div>
+
+                    <div class="flex justify-center mt-4 print:hidden">
+                        <button
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg text-lg transition-btn"
+                            onclick="printNewReport()">🖨 طباعة النتيجة</button>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Settings Section (Clean Minimal Light) -->
+        <section id="settingsPage" class="hidden bg-white rounded-2xl shadow-xs border border-slate-200/80 p-6 sm:p-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <i data-feather="settings" class="text-indigo-600"></i> إعدادات النظام
+                </h2>
+                <button id="backHome" class="text-xs sm:text-sm font-bold text-slate-600 hover:text-indigo-600 px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 flex items-center gap-1.5 transition-colors">
+                    <i data-feather="arrow-right" class="w-4 h-4"></i> رجوع للرئيسية
+                </button>
+            </div>
+
+            <div class="flex gap-3 mb-6 flex-wrap" id="settingsTabsBar">
+                <button class="tab-btn tab-active px-4 py-2 rounded-lg font-medium border border-gray-600"
+                    data-target="generalSettingsTab" data-admin-only="true">⚙️ إعدادات عامة</button>
+                <button class="tab-btn px-4 py-2 rounded-lg font-medium border border-purple-600" data-target="yearsTab">📅 السنوات الدراسية</button>
+                <button class="tab-btn px-4 py-2 rounded-lg font-medium border border-indigo-600" data-target="deptsTab"
+                    data-admin-only="true">🏫 الأقسام</button>
+                <button class="tab-btn px-4 py-2 rounded-lg font-medium border border-green-600"
+                    data-target="studentsTab">👨‍🎓 التلاميذ</button>
+                <button class="tab-btn px-4 py-2 rounded-lg font-medium border border-amber-600"
+                    data-target="activitiesTab">📝 الأنشطة</button>
+                <button class="tab-btn px-4 py-2 rounded-lg font-medium border border-rose-600"
+                    data-target="sessionsTab">🔄 الدورات</button>
+                <button class="tab-btn px-4 py-2 rounded-lg font-medium border border-cyan-600"
+                    data-target="observationsTab">📋 الملاحظات</button>
+            </div>
+
+
+            <!-- إعدادات عامة -->
+            <div id="generalSettingsTab" class="tab-content">
+                <h3 class="text-lg font-bold text-gray-800 mb-3">إعدادات عامة</h3>
+                <div class="space-y-4 max-w-lg">
+                    <div>
+                        <label for="institutionNameInput" class="block text-sm font-medium text-gray-700 mb-1">اسم
+                            المؤسسة</label>
+                        <textarea id="institutionNameInput"
+                            placeholder="اسم المؤسسة الذي سيظهر في التقارير. يمكنك استخدام Enter لكتابة سطر جديد."
+                            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-gray-500"
+                            rows="2"></textarea>
+                    </div>
+
+                    <div class="mt-4 pt-4 border-t border-gray-200">
+                        <h4 class="font-bold text-orange-600 mb-2">☁️ إعدادات الربط السحابي (Firebase)</h4>
+                        <div class="bg-orange-50 p-3 rounded-lg text-sm mb-2 text-gray-700">
+                            إذا لم يتم الحفظ، يرجى نسخ "Realtime Database URL" من لوحة تحكم الفايربيس ولصقه هنا.<br>
+                            صيغ محتملة: <code dir="ltr">https://project-id.firebaseio.com</code> أو <code
+                                dir="ltr">https://project-id-default-rtdb.firebaseio.com</code>
+                        </div>
+                        <div class="bg-blue-50 p-3 rounded-lg text-sm mb-2 text-blue-800">
+                            💡 <strong>ملاحظة لبروتوكول file://:</strong> عند فتح الملف مباشرة (Double Click)، يرجى
+                            التأكد من أن قواعد الحماية (Rules) في Firebase تسمح بالقراءة والكتابة بدون تسجيل دخول، أو قم
+                            بتشغيل خادم محلي (Local Server) لتفعيل المزامنة التلقائية.
+                        </div>
+                        <label for="firebaseDbUrlInput" class="block text-sm font-medium text-gray-700 mb-1">رابط
+                            قاعدة
+                            البيانات (Database URL)</label>
+                        <input type="text" id="firebaseDbUrlInput" placeholder="https://..." dir="ltr"
+                            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 mb-2">
+                        <button id="saveFirebaseConfig"
+                            class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg w-full">حفظ
+                            إعدادات
+                            الربط</button>
+                    </div>
+
+                    <div class="mt-4 pt-4 border-t border-gray-200">
+                        <h4 class="font-bold text-amber-600 mb-2">⚡ استرجاع البيانات والنسخ الاحتياطية</h4>
+                        <p class="text-sm text-gray-600 mb-3">إذا لاحظت اختفاء الأقسام أو التلاميذ بعد تسجيل الدخول كمدير، يمكنك فحص التخزين واسترجاعها بنقرة واحدة:</p>
+                        <button type="button" onclick="openDataRecoveryModal()"
+                            class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2.5 rounded-lg w-full flex items-center justify-center gap-2 font-bold shadow-sm transition-btn">
+                            🔍 فحص واسترجاع البيانات السابقة
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- السنوات الدراسية -->
+            <div id="yearsTab" class="tab-content hidden">
+                <form id="yearForm" class="flex flex-col sm:flex-row gap-3 mb-6">
+                    <input type="text" id="yearName" placeholder="مثال: 2025/2026" required
+                        class="flex-grow px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    <button type="submit"
+                        class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg flex items-center gap-1 transition-btn">
+                        <i data-feather="plus"></i> إضافة سنة
+                    </button>
+                </form>
+                <ul id="yearList" class="space-y-2"></ul>
+            </div>
+
+            <!-- الأقسام -->
+            <div id="deptsTab" class="tab-content hidden">
+                <input type="text" id="deptSearch" placeholder="بحث في الأقسام..."
+                    class="w-full mb-3 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500">
+                <form id="deptForm" class="flex flex-col sm:flex-row gap-3 mb-6">
+                    <input type="text" id="deptName" placeholder="اسم القسم" required
+                        class="flex-grow px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                    <button type="submit"
+                        class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg flex items-center gap-1 transition-btn">
+                        <i data-feather="plus"></i> إضافة
+                    </button>
+                </form>
+                <ul id="deptList" class="space-y-2"></ul>
+            </div>
+
+            <!-- التلاميذ -->
+            <div id="studentsTab" class="tab-content hidden">
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2 font-medium">السنة الدراسية:</label>
+                    <select id="yearSelectForStudents"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 bg-white"></select>
+                </div>
+                <div class="mb-3 flex gap-2">
+                    <input type="text" id="studentSearch" placeholder="بحث في التلاميذ..."
+                        class="flex-grow px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2 font-medium">القسم:</label>
+                    <select id="deptSelectForStudents"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500"></select>
+                </div>
+
+                <button id="addStudentBtn"
+                    class="w-full bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg flex items-center justify-center gap-1 transition-btn mb-6">
+                    <i data-feather="user-plus"></i> إضافة تلميذ جديد
+                </button>
+                <ul id="studentList" class="space-y-2"></ul>
+            </div>
+
+            <!-- الأنشطة -->
+            <div id="activitiesTab" class="tab-content hidden">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-800 mb-3">بنود التقييم (الأنشطة والسلوك)</h3>
+                    <form id="reportActivityForm" class="flex flex-col sm:flex-row gap-2 mb-4">
+                        <input type="text" id="reportActivityName" placeholder="اسم البند الجديد (نشاط أو سلوك)"
+                            required class="flex-grow px-3 py-2 border rounded-lg">
+                        <select id="reportActivityDept" class="px-3 py-2 border rounded-lg bg-white">
+                            <option value="all">كل المستويات</option>
+                        </select>
+                        <button type="submit"
+                            class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg">إضافة</button>
+                    </form>
+                    <ul id="reportActivityList" class="space-y-2">
+                        <!-- قائمة بنود السلوك ستعرض هنا -->
+                    </ul>
+                </div>
+            </div>
+
+            <!-- الدورات -->
+            <div id="sessionsTab" class="tab-content hidden">
+                <h3 class="text-lg font-bold text-gray-800 mb-3">إدارة الدورات الدراسية</h3>
+                <p class="text-sm text-gray-600 mb-4">هذه الدورات ستظهر في نموذج النتائج لحفظ تقييمات كل دورة على
+                    حدة.
+                </p>
+                <form id="sessionForm" class="flex gap-2 mb-4">
+                    <input type="text" id="sessionName" placeholder="اسم الدورة الجديدة (مثال: الدورة الأولى)" required
+                        class="flex-grow px-3 py-2 border rounded-lg">
+                    <button type="submit" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg">إضافة
+                        دورة</button>
+                </form>
+                <ul id="sessionList" class="space-y-2">
+                    <!-- قائمة الدورات ستعرض هنا -->
+                </ul>
+            </div>
+            <!-- الملاحظات العامة -->
+            <div id="observationsTab" class="tab-content hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-800 mb-3">ملاحظات الأستاذ(ة):</h3>
+                        <p class="text-sm text-gray-600 mb-4">هذه الملاحظات ستظهر كخيارات جاهزة ضمن حقل "ملاحظات
+                            الأستاذ(ة)" في بطاقة النتائج.</p>
+                        <form id="observationForm" class="flex gap-2 mb-4">
+                            <input type="text" id="observationName" placeholder="نص الملاحظة الجديدة" required
+                                class="flex-grow px-3 py-2 border rounded-lg">
+                            <button type="submit"
+                                class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg">إضافة</button>
+                        </form>
+                        <ul id="observationList" class="space-y-2">
+                            <!-- قائمة الملاحظات ستعرض هنا -->
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-800 mb-3">💯 الملاحظات التلقائية حسب النقطة</h3>
+                        <p class="text-sm text-gray-600 mb-4">بمجرد إدخال نقطة في النتيجة، ستظهر الملاحظة المرتبطة
+                            بها
+                            تلقائياً.</p>
+                        <form id="scoreObservationForm" class="grid grid-cols-4 gap-2 mb-4 items-center">
+                            <input type="number" id="scoreObsMin" placeholder="من" required
+                                class="px-3 py-2 border rounded-lg" step="0.01">
+                            <input type="number" id="scoreObsMax" placeholder="إلى" required
+                                class="px-3 py-2 border rounded-lg" step="0.01">
+                            <input type="text" id="scoreObsText" placeholder="نص الملاحظة" required
+                                class="col-span-2 px-3 py-2 border rounded-lg">
+                            <button type="submit"
+                                class="col-span-4 bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg mt-2">إضافة
+                                ملاحظة بالنقطة</button>
+                        </form>
+                        <ul id="scoreObservationList" class="space-y-2">
+                            <!-- قائمة الملاحظات حسب النقطة -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+
+        </section>
+        </main>
+    </div> <!-- نهاية حاوية المحتوى الرئيسي main-wrapper -->
+
+    <!-- Modal اختيار نوع البند -->
+    <div id="addItemTypeModal"
+        class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <div class="bg-white rounded-xl p-6 w-96 shadow-lg">
+            <h3 class="text-lg font-bold mb-4">اختر نوع البند</h3>
+            <div class="flex flex-col gap-4">
+                <button id="addActivityTypeBtn" class="w-full text-left p-4 rounded-lg bg-amber-100 hover:bg-amber-200">
+                    <strong class="text-amber-800">نشاط (تقدير نصي)</strong>
+                    <p class="text-sm text-gray-600">مثل: القرآن الكريم، الرياضيات (يتم تقييمه بنص مثل: جيد،
+                        حسن...).
+                    </p>
+                </button>
+                <button id="addBehaviorTypeBtn" class="w-full text-left p-4 rounded-lg bg-blue-100 hover:bg-blue-200">
+                    <strong class="text-blue-800">سلوك (تقييم رقمي)</strong>
+                    <p class="text-sm text-gray-600">مثل: المواظبة، المشاركة (يتم تقييمه برقم من 0 إلى 10).</p>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Tailwind -->
+    <div id="modalConfirm" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <div class="bg-white rounded-xl p-6 w-96 shadow-lg">
+            <p class="mb-4" id="modalText">هل أنت متأكد؟</p>
+            <div class="flex justify-end gap-4">
+                <button id="modalCancel" class="px-4 py-2 rounded-lg bg-gray-300 hover:bg-gray-400">إلغاء</button>
+                <button id="modalConfirmBtn"
+                    class="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white">حذف</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal قائمة جميع التلاميذ -->
+    <div id="allStudentsModal"
+        class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
+        <div class="bg-white rounded-xl p-6 w-full max-w-3xl shadow-lg max-h-full flex flex-col">
+            <div class="flex justify-between items-center mb-4 border-b pb-3">
+                <h3 class="text-xl font-bold text-green-700">قائمة جميع التلاميذ (<span id="allStudentsCount">0</span>)
+                </h3>
+                <button type="button" id="allStudentsModalClose"
+                    class="text-gray-500 hover:text-gray-800 text-2xl font-bold">&times;</button>
+            </div>
+            <input type="text" id="allStudentsSearch" placeholder="بحث بالاسم أو القسم..."
+                class="w-full px-4 py-2 border rounded-lg mb-4">
+            <div class="overflow-y-auto">
+                <ul id="allStudentsList" class="space-y-2">
+                    <!-- قائمة التلاميذ ستضاف هنا -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal ترتيب المراكز -->
+    <div id="rankingModal"
+        class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
+        <div class="bg-white rounded-xl p-6 w-full max-w-2xl shadow-lg max-h-full flex flex-col">
+            <div class="flex justify-between items-center mb-4 border-b pb-3">
+                <h3 class="text-xl font-bold text-amber-700">🏆 ترتيب الأوائل حسب المستوى</h3>
+                <div class="flex gap-2">
+                    <button onclick="printRankingList()"
+                        class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded-lg text-sm">🖨 طباعة
+                        اللائحة</button>
+                    <button type="button" onclick="document.getElementById('rankingModal').classList.add('hidden')"
+                        class="text-gray-500 hover:text-gray-800 text-2xl font-bold">&times;</button>
+                </div>
+            </div>
+            <div class="mb-4">
+                <select id="rankingDeptSelect"
+                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500">
+                    <option value="">-- اختر القسم/المستوى لعرض الترتيب --</option>
+                </select>
+            </div>
+            <div class="overflow-y-auto" id="rankingResultList">
+                <p class="text-center text-gray-500">اختر قسماً لعرض ترتيب التلاميذ...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal تسجيل الغياب -->
+    <div id="absenceModal"
+        class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
+        <div class="bg-white rounded-xl p-6 w-full max-w-3xl shadow-lg max-h-full flex flex-col">
+            <div class="flex justify-between items-center mb-4 border-b pb-3">
+                <h3 class="text-xl font-bold text-red-700">🚩 تسجيل وتتبع الغياب</h3>
+                <button type="button" onclick="document.getElementById('absenceModal').classList.add('hidden')"
+                    class="text-gray-500 hover:text-gray-800 text-2xl font-bold">&times;</button>
+            </div>
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <select id="absDeptSelect" class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500">
+                    <option value="">-- اختر القسم --</option>
+                </select>
+                <select id="absSessionSelect"
+                    class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500"></select>
+            </div>
+            <div class="overflow-y-auto flex-grow" id="absStudentsList">
+                <p class="text-center text-gray-500">اختر القسم والدورة لبدء تسجيل الغياب...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal أداء الواجبات الشهرية -->
+    <div id="performanceModal"
+        class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
+        <div class="bg-white rounded-xl p-6 w-full max-w-4xl shadow-lg max-h-full flex flex-col">
+            <div class="flex justify-between items-center mb-4 border-b pb-3">
+                <h3 class="text-xl font-bold text-purple-700">📊 أداء الواجبات الشهرية</h3>
+                <button type="button" onclick="document.getElementById('performanceModal').classList.add('hidden')"
+                    class="text-gray-500 hover:text-gray-800 text-2xl font-bold">&times;</button>
+            </div>
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <select id="perfDeptSelect" class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500">
+                    <option value="">-- اختر القسم --</option>
+                </select>
+                <select id="perfMonthSelect" class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500">
+                    <option value="شتنبر">شتنبر</option>
+                    <option value="أكتوبر">أكتوبر</option>
+                    <option value="نونبر">نونبر</option>
+                    <option value="دجنبر">دجنبر</option>
+                    <option value="يناير">يناير</option>
+                    <option value="فبراير">فبراير</option>
+                    <option value="مارس">مارس</option>
+                    <option value="أبريل">أبريل</option>
+                    <option value="ماي">ماي</option>
+                    <option value="يونيو">يونيو</option>
+                </select>
+            </div>
+            <div class="overflow-y-auto flex-grow" id="perfStudentsList">
+                <p class="text-center text-gray-500">اختر القسم والشهر لإدخال النقط...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal بطاقة التلميذ -->
+    <div id="studentModal"
+        class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
+        <div class="bg-white rounded-xl p-6 w-full max-w-2xl shadow-lg max-h-full overflow-y-auto">
+            <h3 id="studentModalTitle" class="text-xl font-bold text-green-700 mb-4">بطاقة التلميذ</h3>
+            <form id="studentDetailForm" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <input type="hidden" id="studentIdInput">
+                <!-- قسم الصورة -->
+                <div class="flex flex-col items-center justify-center">
+                    <img id="studentImagePreview" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
+                        alt="صورة التلميذ" class="w-32 h-32 rounded-full object-cover border-4 border-gray-200 mb-2">
+                    <input type="file" id="studentImageInput" class="hidden" accept="image/*">
+                    <div class="flex gap-4">
+                        <label for="studentImageInput"
+                            class="cursor-pointer text-sm text-indigo-600 hover:text-indigo-800">تغيير
+                            الصورة</label>
+                        <button type="button" id="deleteImageBtn" class="text-sm text-red-600 hover:text-red-800">حذف
+                            الصورة</button>
+                    </div>
+                </div>
+                <!-- قسم الحقول وبطاقة التلميذ -->
+                <div class="space-y-4 md:col-span-2">
+                    <!-- تحديد القسم -->
+                    <div class="bg-indigo-50/80 border border-indigo-200 rounded-xl p-3">
+                        <label for="studentModalDeptSelect" class="block text-xs font-bold text-indigo-900 mb-1.5 flex items-center gap-1.5">
+                            <span>🏫</span>
+                            <span>القسم / المستوى الدراسي:</span>
+                            <span class="text-rose-500">*</span>
+                        </label>
+                        <select id="studentModalDeptSelect" required
+                            class="w-full px-3 py-2 border border-indigo-300 rounded-lg bg-white font-bold text-indigo-900 text-sm focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+                            <option value="">-- اختر القسم --</option>
+                        </select>
+                    </div>
+                    <div id="studentFieldsContainer" class="space-y-4"></div>
+                </div>
+                <button type="button" id="addNewFieldBtn"
+                    class="md:col-span-2 mt-2 text-sm text-blue-600 hover:text-blue-800">+ إضافة خانة جديدة</button>
+                <button type="button" id="printCardBtn"
+                    class="hidden md:col-span-3 mt-4 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg w-full">🖨️
+                    طباعة البطاقة</button>
+                <div class="flex justify-end gap-4 mt-6 md:col-span-3">
+                    <button type="button" id="studentModalCancel"
+                        class="px-4 py-2 rounded-lg bg-gray-300 hover:bg-gray-400">إلغاء</button>
+                    <button type="submit" id="studentModalSave"
+                        class="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white">حفظ
+                        المعلومات</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- ============================================================ -->
+    <!-- ÙˆØ­Ø¯Ø§Øª Ø§Ù„Ø¬Ø§ÙØ§Ø³ÙƒØ±ÙŠØ¨Øª Ù…Ù‚Ø³Ù…Ø© Ø­Ø³Ø¨ Ø§Ù„ØªØ®ØµØµ ÙˆØ§Ù„Ù…Ø³Ø¤ÙˆÙ„ÙŠØ© -->
+    <!-- ============================================================ -->
+    <!-- 1. Ø¥Ø¹Ø¯Ø§Ø¯Ø§Øª Ø§Ù„Ù†Ø¸Ø§Ù… ÙˆØ§Ù„ØªØ®Ø²ÙŠÙ† Ø§Ù„Ù…Ø­Ù„ÙŠ ÙˆÙ‚Ø§Ø¹Ø¯Ø© Ø§Ù„Ø¨ÙŠØ§Ù†Ø§Øª -->
+    <script src="js/backup-data.js"></script>
+    <script src="js/config.js"></script>
+    <!-- 2. Ø­Ø§Ù„Ø© Ø§Ù„Ù†Ø¸Ø§Ù… Ø§Ù„Ø¹Ø§Ù…Ø© ÙˆØ§Ù„Ø¨ÙŠØ§Ù†Ø§Øª -->
+    <script src="js/state.js"></script>
+    <!-- 3. Ø§Ù„Ù…Ø²Ø§Ù…Ù†Ø© Ø§Ù„Ø³Ø­Ø§Ø¨ÙŠØ© ÙˆÙ‚Ø§Ø¹Ø¯Ø© Ø§Ù„Ø¨ÙŠØ§Ù†Ø§Øª -->
+    <script src="js/firebase-sync.js"></script>
+    <!-- 4. Ù†Ø¸Ø§Ù… Ø§Ù„Ù…ØµØ§Ø¯Ù‚Ø© ÙˆØ¥Ø¯Ø§Ø±Ø© Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù…ÙŠÙ† -->
+    <script src="js/auth.js"></script>
+    <!-- 5. Ø¥Ø¯Ø§Ø±Ø© Ø§Ù„Ø³Ù†ÙˆØ§Øª Ø§Ù„Ø¯Ø±Ø§Ø³ÙŠØ© -->
+    <script src="js/years.js"></script>
+    <!-- 6. Ø¥Ø¯Ø§Ø±Ø© Ø§Ù„Ø£Ù‚Ø³Ø§Ù… ÙˆØ§Ù„Ù…Ø³ØªÙˆÙŠØ§Øª -->
+    <script src="js/departments.js"></script>
+    <!-- 7. Ø¥Ø¯Ø§Ø±Ø© Ø§Ù„ØªÙ„Ø§Ù…ÙŠØ° ÙˆØ¨ÙŠØ§Ù†Ø§ØªÙ‡Ù… -->
+    <script src="js/students.js"></script>
+    <!-- 8. Ø¥Ø¯Ø§Ø±Ø© Ø¨Ù†ÙˆØ¯ Ø§Ù„ØªÙ‚ÙŠÙŠÙ… ÙˆØ§Ù„Ø£Ù†Ø´Ø·Ø© ÙˆØ§Ù„Ø³Ù„ÙˆÙƒ -->
+    <script src="js/activities.js"></script>
+    <!-- 9. Ø¥Ø¯Ø§Ø±Ø© Ø§Ù„Ù…Ù„Ø§Ø­Ø¸Ø§Øª Ø§Ù„Ø¹Ø§Ù…Ø© ÙˆØ§Ù„ØªÙ„Ù‚Ø§Ø¦ÙŠØ© -->
+    <script src="js/observations.js"></script>
+    <!-- 10. Ø¥Ø¯Ø§Ø±Ø© Ø§Ù„Ø¯ÙˆØ±Ø§Øª Ø§Ù„Ø¯Ø±Ø§Ø³ÙŠØ© -->
+    <script src="js/sessions.js"></script>
+    <!-- 11. Ø§Ù„Ù†ØªÙŠØ¬Ø© Ø§Ù„Ù…Ø¯Ø±Ø³ÙŠØ© ÙˆØ­Ø³Ø§Ø¨ Ø§Ù„Ù…Ø¹Ø¯Ù„Ø§Øª -->
+    <script src="js/report-card.js"></script>
+    <!-- 12. Ø¥Ø¯Ø§Ø±Ø© Ø§Ù„ØµÙˆØ± Ø§Ù„Ù…Ù„Ø­Ù‚Ø© Ø¨Ø§Ù„Ù†ØªÙŠØ¬Ø© -->
+    <script src="js/images.js"></script>
+    <!-- 13. ØªØ±ØªÙŠØ¨ Ø§Ù„Ù…Ø±Ø§ÙƒØ² ÙˆØ§Ù„Ø£ÙˆØ§Ø¦Ù„ -->
+    <script src="js/ranking.js"></script>
+    <!-- 14. ØªØ³Ø¬ÙŠÙ„ ÙˆØªØªØ¨Ø¹ Ø§Ù„ØºÙŠØ§Ø¨ -->
+    <script src="js/absence.js"></script>
+    <!-- 15. Ø£Ø¯Ø§Ø¡ Ø§Ù„ÙˆØ§Ø¬Ø¨Ø§Øª Ø§Ù„Ø´Ù‡Ø±ÙŠØ© ÙˆØ§Ù„Ø±Ø³ÙˆÙ… -->
+    <script src="js/performance.js"></script>
+    <!-- 16. ÙˆØ¸Ø§Ø¦Ù Ø§Ù„Ø·Ø¨Ø§Ø¹Ø© -->
+    <script src="js/print.js"></script>
+    <!-- 17. ØªØµØ¯ÙŠØ± ÙˆØ§Ø³ØªÙŠØ±Ø§Ø¯ Ø§Ù„Ø¨ÙŠØ§Ù†Ø§Øª ÙˆØ§Ù„Ù†Ø³Ø® Ø§Ù„Ø§Ø­ØªÙŠØ§Ø·ÙŠ -->
+    <script src="js/backup.js"></script>
+    <!-- 18. نقطة الانطلاق والتنقل العام -->
+    <script src="js/app.js"></script>
+
+    <!-- دوال التحكم في الشريط الجانبي والتنقل المتجاوب لجميع الشاشات -->
+    <script>
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            if (!sidebar || !backdrop) return;
+            const isClosed = sidebar.classList.contains('translate-x-full');
+            if (isClosed) {
+                sidebar.classList.remove('translate-x-full');
+                backdrop.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('translate-x-full');
+                backdrop.classList.add('hidden');
+            }
+        }
+
+        function switchToHomePage() {
+            const homePage = document.getElementById('homePage');
+            const settingsPage = document.getElementById('settingsPage');
+            const navHomeBtn = document.getElementById('navHomeBtn');
+            const openSettings = document.getElementById('openSettings');
+            const topBarPageTitle = document.getElementById('topBarPageTitle');
+
+            if (homePage) homePage.classList.remove('hidden');
+            if (settingsPage) settingsPage.classList.add('hidden');
+            if (navHomeBtn) navHomeBtn.classList.add('active');
+            if (openSettings) openSettings.classList.remove('active');
+            if (topBarPageTitle) topBarPageTitle.textContent = 'لوحة التحكم والنتائج';
+
+            if (window.innerWidth < 1024) {
+                const sidebar = document.getElementById('sidebar');
+                const backdrop = document.getElementById('sidebarBackdrop');
+                if (sidebar) sidebar.classList.add('translate-x-full');
+                if (backdrop) backdrop.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+
+</html>
