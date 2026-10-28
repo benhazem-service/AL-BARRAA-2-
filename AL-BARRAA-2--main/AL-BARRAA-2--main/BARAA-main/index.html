@@ -1,0 +1,2001 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>âš™ Ø¥Ø¯Ø§Ø±Ø© Ø§Ù„Ù†Ø¸Ø§Ù… Ø§Ù„ØªØ¹Ù„ÙŠÙ…ÙŠ</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Feather Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
+    <!-- Firebase SDKs (v8) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-analytics.js"></script>
+    <!-- Ø®Ø· ØªØ¬ÙˆØ§Ù„ Ù…Ù† Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- الأنماط المخصصة -->
+    <link rel="stylesheet" href="css/style.css">
+    <script>
+        function openDataRecoveryModal() {
+            if (window._openDataRecoveryModalImpl) return window._openDataRecoveryModalImpl();
+            const m = document.getElementById('dataRecoveryModal');
+            if (m) m.classList.remove('hidden');
+            if (typeof scanAllDataSources === 'function') scanAllDataSources();
+        }
+        function closeDataRecoveryModal() {
+            if (window._closeDataRecoveryModalImpl) return window._closeDataRecoveryModalImpl();
+            const m = document.getElementById('dataRecoveryModal');
+            if (m) m.classList.add('hidden');
+        }
+    </script>
+</head>
+<body class="bg-gray-100 min-h-screen rtl">
+
+    <!-- ===== شاشة تسجيل الدخول ===== -->
+    <div id="loginOverlay">
+        <div class="login-card">
+            <div class="text-center mb-7">
+                <div class="text-5xl mb-3">📚</div>
+                <h2 class="text-2xl font-bold text-white">النظام التعليمي</h2>
+                <p class="text-indigo-200 text-sm mt-1">أدخل بيانات الدخول للمتابعة</p>
+            </div>
+            <div class="flex flex-col gap-4">
+                <div>
+                    <label class="text-indigo-200 text-sm block mb-1">رقم الهاتف</label>
+                    <input id="loginPhone" type="tel" placeholder="0600000000" class="login-input"
+                        autocomplete="username">
+                </div>
+                <div>
+                    <label class="text-indigo-200 text-sm block mb-1">كلمة السر</label>
+                    <input id="loginPassword" type="password" placeholder="••••••••" class="login-input"
+                        autocomplete="current-password">
+                </div>
+                <p id="loginError" class="login-error"></p>
+                <button id="loginBtn" class="login-btn">
+                    <span id="loginBtnText">تسجيل الدخول</span>
+                </button>
+            </div>
+            <p class="text-center text-indigo-300 text-xs mt-6 opacity-60">النظام التعليمي © 2026</p>
+        </div>
+    </div>
+
+    <!-- ===== مودال إدارة الحسابات (للأدمن) ===== -->
+    <div id="adminModal" class="hidden">
+        <div class="admin-modal-content">
+            <div
+                class="bg-gradient-to-l from-indigo-600 to-purple-700 p-5 rounded-t-xl flex justify-between items-center">
+                <h2 class="text-white text-xl font-bold">⚙️ لوحة إدارة الحسابات</h2>
+                <button onclick="document.getElementById('adminModal').classList.add('hidden')"
+                    class="text-white hover:text-indigo-200 text-2xl font-bold leading-none">&times;</button>
+            </div>
+            <div class="p-5">
+                <!-- نموذج إضافة / تعديل حساب -->
+                <div class="bg-indigo-50 rounded-xl p-4 mb-5">
+                    <h3 id="accountFormTitle" class="font-bold text-indigo-700 mb-3">➕ إضافة حساب جديد</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-sm text-gray-600 block mb-1">الاسم الكامل</label>
+                            <input id="accName" type="text" placeholder="مثال: محمد أحمد"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 text-sm">
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-600 block mb-1">رقم الهاتف (معرّف الدخول)</label>
+                            <input id="accPhone" type="tel" placeholder="0600000000" dir="ltr"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 text-sm">
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-600 block mb-1">كلمة السر</label>
+                            <input id="accPassword" type="text" placeholder="اتركه فارغاً لعدم التغيير"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 text-sm">
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-600 block mb-1">اسم المؤسسة (في النتيجة)</label>
+                            <textarea id="accInstitution" rows="2" placeholder="يمكن كتابة سطرين"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 text-sm"></textarea>
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-600 block mb-1">المستويات المسموح بها</label>
+                            <div id="accLevelsCheckboxes"
+                                class="flex flex-wrap gap-2 p-2 border border-gray-300 rounded-lg bg-white min-h-10">
+                                <span class="text-gray-400 text-xs">سيتم تحميل المستويات...</span>
+                            </div>
+                        </div>
+                    </div>
+                    <input id="accEditingPhone" type="hidden" value="">
+                    <div class="flex gap-2 mt-3">
+                        <button id="accSaveBtn" onclick="saveAccount()"
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg text-sm font-bold">💾
+                            حفظ</button>
+                        <button id="accCancelBtn" onclick="cancelAccountEdit()"
+                            class="hidden bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm">إلغاء</button>
+                    </div>
+                </div>
+
+                <!-- بطاقة الرقم السري لعمليات الحذف -->
+                <div class="bg-rose-50/90 border border-rose-200 rounded-xl p-4 mb-5 shadow-xs">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="font-bold text-rose-900 text-sm flex items-center gap-1.5">
+                            <span>🔒</span>
+                            <span>الرقم السري لعمليات الحذف</span>
+                        </h3>
+                        <span class="text-[11px] text-gray-600">الافتراضي: <strong class="font-mono text-rose-700 bg-white px-1.5 py-0.5 rounded border border-rose-200">1234</strong></span>
+                    </div>
+                    <p class="text-xs text-rose-700 mb-3">يُطلب هذا الرمز السري قبل تنفيذ أي عملية حذف للتأكيد (تلميذ، قسم، دورة، بند تقرير، إلخ):</p>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <input type="password" id="adminDeletePinInput" placeholder="الرقم السري الجديد"
+                            class="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white flex-grow focus:ring-2 focus:ring-rose-400">
+                        <input type="password" id="adminConfirmDeletePinInput" placeholder="تأكيد الرقم السري"
+                            class="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white flex-grow focus:ring-2 focus:ring-rose-400">
+                        <button type="button" onclick="saveAdminDeletePin()"
+                            class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition-btn shrink-0 flex items-center justify-center gap-1">
+                            💾 حفظ الرمز
+                        </button>
+                    </div>
+                    <p id="adminDeletePinStatus" class="text-xs font-bold mt-2 hidden"></p>
+                </div>
+
+                <!-- قسم تحديد وتوزيع التلاميذ غير المحددة أقسامهم -->
+                <div id="adminUnassignedSection" class="bg-amber-50/80 border border-amber-200 rounded-xl p-4 mb-5 shadow-xs">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="font-bold text-amber-900 text-sm flex items-center gap-1.5">
+                            <span>🏫</span>
+                            <span>تحديد أقسام التلاميذ (غير المحددة أقسامهم)</span>
+                        </h3>
+                        <span id="adminUnassignedBadge" class="text-xs px-2.5 py-0.5 rounded-full font-bold bg-amber-200 text-amber-900">0 تلميذ</span>
+                    </div>
+                    <p class="text-xs text-amber-700 mb-3">يمكنك من هنا تحديد وتعيين الأقسام لجميع التلاميذ الذين لم يتم تعيين أقسام لهم بعد:</p>
+                    <div id="adminUnassignedList" class="space-y-2 max-h-56 overflow-y-auto pr-1">
+                        <!-- قائمة التلاميذ غير المحددة أقسامهم ستظهر هنا -->
+                    </div>
+                </div>
+
+                <!-- قائمة الحسابات -->
+                <h3 class="font-bold text-gray-700 mb-2">📋 قائمة الحسابات</h3>
+                <div id="accountsList" class="space-y-2">
+                    <p class="text-gray-400 text-sm text-center py-4">جاري التحميل...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== مودال تحديد الأقسام الخاصة بالمشترك ===== -->
+    <div id="myDepartmentsModal"
+        class="hidden fixed inset-0 z-[1000] bg-black bg-opacity-60 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl transform transition-all flex flex-col max-h-[90vh]">
+            <div class="bg-gradient-to-l from-indigo-700 via-indigo-600 to-purple-700 p-4 sm:p-5 flex justify-between items-center text-white shrink-0">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-2xl">🏫</span>
+                    <div>
+                        <h2 class="text-base sm:text-lg font-bold">تحديد الأقسام الخاصة بي</h2>
+                        <p class="text-xs text-indigo-100 font-medium">السنة الدراسية: <span id="myDeptsModalYear" class="font-bold underline">--</span></p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeMyDepartmentsModal()"
+                    class="text-white hover:text-indigo-200 text-2xl leading-none">&times;</button>
+            </div>
+
+            <div class="p-4 sm:p-5 overflow-y-auto space-y-4">
+                <div class="bg-indigo-50/80 border border-indigo-200 rounded-xl p-3 text-xs text-indigo-900 leading-relaxed">
+                    💡 <strong>اختر الأقسام التي تدرسها أو تشرف عليها:</strong><br>
+                    سيتم عرض تلاميذ هذه الأقسام فقط في لوحة التحكم وقوائم النتائج، وسيتم حفظ اختيارك في حسابك السحابي تلقائياً للوصول إليه من أي هاتف أو حاسوب آخر.
+                </div>
+
+                <!-- أزرار التحديد السريع والبحث -->
+                <div class="flex justify-between items-center gap-2 flex-wrap">
+                    <div class="flex gap-1.5">
+                        <button type="button" onclick="selectAllMyDepts(true)"
+                            class="bg-indigo-100 hover:bg-indigo-200 text-indigo-800 text-xs font-bold px-3 py-1.5 rounded-lg transition-colors">
+                            ☑️ تحديد الكل
+                        </button>
+                        <button type="button" onclick="selectAllMyDepts(false)"
+                            class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold px-3 py-1.5 rounded-lg transition-colors">
+                            ⬜ إلغاء التحديد
+                        </button>
+                    </div>
+                    <span id="myDeptsSelectedCount" class="text-xs font-bold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-100">
+                        0 قسم محدد
+                    </span>
+                </div>
+
+                <!-- قائمة الأقسام مع الصناديق -->
+                <div id="myDeptsCheckboxesList" class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                    <p class="text-gray-400 text-sm text-center py-4">جاري التحميل...</p>
+                </div>
+
+                <!-- إضافة قسم جديد خاص بي -->
+                <div class="pt-3 border-t border-gray-100">
+                    <label class="block text-xs font-bold text-gray-700 mb-1.5">➕ إضافة قسم جديد لم يكن مسجلاً:</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="myDeptsNewName" placeholder="اسم القسم الجديد (مثال: التحضيري أو الرابع أ)"
+                            class="flex-grow px-3 py-1.5 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-indigo-500">
+                        <button type="button" onclick="quickAddMyDept()"
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-1.5 rounded-lg shrink-0 transition-colors">
+                            إضافة
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- أسفل المودال: زر الحفظ -->
+            <div class="bg-gray-50 px-5 py-3.5 border-t border-gray-200 flex justify-between items-center gap-3 shrink-0">
+                <button type="button" onclick="closeMyDepartmentsModal()"
+                    class="text-gray-600 hover:text-gray-800 text-xs font-bold px-4 py-2 rounded-lg transition-colors">
+                    إلغاء
+                </button>
+                <button type="button" onclick="saveMyDepartmentsSelection()"
+                    class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-6 py-2.5 rounded-xl shadow-sm transition-all flex items-center gap-1.5">
+                    <span>💾 حفظ وتطبيق أقسامي</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== مودال التصدير ===== -->
+    <div id="exportModal"
+        class="hidden fixed inset-0 z-[1000] bg-black bg-opacity-60 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl transform transition-all text-right">
+            <div class="bg-gradient-to-l from-indigo-700 to-indigo-600 p-4.5 flex justify-between items-center text-white">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">💾</span>
+                    <div>
+                        <h2 class="text-base font-bold">تصدير النسخة الاحتياطية</h2>
+                        <p class="text-xs text-indigo-100">حفظ كافة بيانات المؤسسة في ملف محلي آمن</p>
+                    </div>
+                </div>
+                <button onclick="document.getElementById('exportModal').classList.add('hidden')"
+                    class="text-white hover:text-indigo-200 text-2xl leading-none cursor-pointer">&times;</button>
+            </div>
+            <div class="p-5 flex flex-col gap-3">
+                <button onclick="exportAll()"
+                    class="group bg-gradient-to-l from-indigo-50 to-purple-50 hover:from-indigo-100 hover:to-purple-100 border border-indigo-200 text-indigo-950 font-bold p-3.5 rounded-xl w-full transition-all text-right shadow-2xs hover:shadow-xs cursor-pointer">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs bg-indigo-600 text-white px-2.5 py-0.5 rounded-md font-extrabold">موصى به ⭐</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-extrabold text-indigo-900">تصدير النسخة الشاملة الكاملة</span>
+                            <span class="text-lg">💎</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                        ملف موحد شامل لكل شيء: جميع التلاميذ، الأقسام، الدورات، النقاط، الواجبات الشهرية، وجميع الصور.
+                    </p>
+                </button>
+
+                <button onclick="exportImages()"
+                    class="bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 font-bold p-3 rounded-xl w-full transition-all text-right cursor-pointer">
+                    <div class="flex items-center justify-end gap-2">
+                        <span class="text-xs font-bold text-slate-700">تصدير أرشيف الصور فقط (ملف صور)</span>
+                        <span class="text-base">🖼️</span>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== مودال الاستيراد ===== -->
+    <div id="importModal"
+        class="hidden fixed inset-0 z-[1000] bg-black bg-opacity-60 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl w-full max-w-sm overflow-hidden shadow-2xl transform transition-all">
+            <div class="bg-gray-600 p-4 flex justify-between items-center">
+                <h2 class="text-white text-lg font-bold">📂 خيارات الاستيراد</h2>
+                <button onclick="document.getElementById('importModal').classList.add('hidden')"
+                    class="text-white hover:text-gray-200 text-2xl leading-none">&times;</button>
+            </div>
+            <div class="p-5 flex flex-col gap-3">
+                <button onclick="document.getElementById('importAllInput').click()"
+                    class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-3 rounded-lg w-full transition-colors">📦
+                    استيراد كل البيانات (استبدال)</button>
+                <button onclick="document.getElementById('importImagesInput').click()"
+                    class="bg-teal-100 hover:bg-teal-200 text-teal-800 font-bold py-3 rounded-lg w-full transition-colors">🖼️
+                    استيراد الصور فقط (دمج)</button>
+
+                <input type="file" id="importAllInput" accept=".json" class="hidden" onclick="this.value=null" onchange="importAll(event)">
+                <input type="file" id="importImagesInput" accept=".json" class="hidden" onclick="this.value=null" onchange="importImages(event)">
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== مودال استرجاع البيانات السابقة ===== -->
+    <div id="dataRecoveryModal"
+        class="hidden fixed inset-0 z-[1000] bg-black bg-opacity-60 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl transform transition-all text-right">
+            <div class="bg-gradient-to-l from-amber-600 to-orange-700 p-4.5 flex justify-between items-center text-white">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">🔍</span>
+                    <div>
+                        <h2 class="text-base sm:text-lg font-bold">فاحص واسترجاع البيانات الذكي</h2>
+                        <p class="text-xs text-amber-100">التعرف على الحساب واسترجاع البيانات من السحابة أو من ملف محلي</p>
+                    </div>
+                </div>
+                <button onclick="closeDataRecoveryModal()"
+                    class="text-white hover:text-amber-200 text-2xl leading-none cursor-pointer">&times;</button>
+            </div>
+            <div class="p-5 max-h-[72vh] overflow-y-auto space-y-4">
+                <!-- 1. استرجاع السحابة برقم الهاتف مع التعرف التلقائي على الحساب -->
+                <div class="bg-gradient-to-l from-blue-50 via-indigo-50/60 to-white border border-blue-200 rounded-xl p-4 shadow-xs">
+                    <div class="flex items-start gap-2.5 mb-2.5">
+                        <span class="text-2xl">☁️</span>
+                        <div>
+                            <h3 class="text-xs sm:text-sm font-extrabold text-blue-900">التعرف على الحساب واسترجاع البيانات من السحابة</h3>
+                            <p class="text-[11px] text-blue-700 leading-relaxed">
+                                يتم التعرف على حسابك عبر رقم الهاتف المسجل لاسترجاع كافة تلاميذه وأقسامه ونقاطه وسجلات واجباته الشهرية فوراً من السحابة.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col sm:flex-row items-center gap-2">
+                        <div class="relative w-full sm:flex-1">
+                            <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400 text-sm">📱</span>
+                            <input type="text" id="cloudRecoveryPhoneInput" dir="ltr"
+                                placeholder="0662065072"
+                                onkeydown="if(event.key==='Enter') searchCloudByPhone()"
+                                class="w-full pr-9 pl-3 py-2.5 bg-white border border-blue-300 rounded-xl text-sm font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-left shadow-2xs">
+                        </div>
+                        <button type="button" onclick="searchCloudByPhone()"
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold shrink-0 shadow-sm flex items-center justify-center gap-1.5 transition-all w-full sm:w-auto cursor-pointer">
+                            🔍 فحص واسترجاع سحابة الرقم
+                        </button>
+                    </div>
+                    <div id="cloudPhoneSearchResult" class="mt-3 empty:hidden"></div>
+                </div>
+
+                <!-- 2. خيار استرجاع من ملف محلي -->
+                <div class="bg-indigo-50/70 border border-indigo-200/80 rounded-xl p-3.5 flex flex-col sm:flex-row items-center justify-between gap-3 text-right">
+                    <div>
+                        <p class="text-xs font-bold text-indigo-900">هل لديك ملف نسخ احتياطي محفوظ في جهازك؟</p>
+                        <p class="text-[11px] text-indigo-700">يمكنك رفع ملف JSON (النسخة الشاملة) لاسترجاع وتثبيت كافة البيانات فوراً</p>
+                    </div>
+                    <button type="button" onclick="document.getElementById('recoveryFileInput').click()"
+                        class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-xs font-bold shrink-0 shadow-sm flex items-center gap-1.5 transition-btn cursor-pointer">
+                        📁 اختيار ملف النسخة الاحتياطية
+                    </button>
+                    <input type="file" id="recoveryFileInput" accept=".json" class="hidden" onclick="this.value=null" onchange="handleRecoveryFile(event)">
+                </div>
+
+                <!-- 3. قائمة النسخ المكتشفة تلقائياً في المتصفح والسحابة -->
+                <div>
+                    <div class="flex justify-between items-center mb-2.5">
+                        <p class="text-xs sm:text-sm text-slate-700 font-bold">النسخ الاحتياطية المكتشفة في المتصفح والسحابة:</p>
+                        <button onclick="scanAllDataSources()"
+                            class="bg-amber-100 hover:bg-amber-200 text-amber-900 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer">
+                            🔄 إعادة الفحص الشامل
+                        </button>
+                    </div>
+                    <div id="recoveryList" class="space-y-2.5">
+                        <p class="text-gray-400 text-sm text-center py-4">جاري الفحص...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-5 py-3 border-t border-gray-200 flex justify-between items-center">
+                <span class="text-xs text-gray-500">اختر النسخة واضغط "✅ استرجاع وتثبيت لحسابي"</span>
+                <button onclick="closeDataRecoveryModal()"
+                    class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-xs font-bold cursor-pointer">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- خلفية تعتيم للشاشات الصغيرة عند فتح القائمة الجانبية -->
+    <div id="sidebarBackdrop" onclick="toggleMobileSidebar()"
+        class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-40 lg:hidden hidden transition-opacity"></div>
+
+    <!-- ===== الشريط الجانبي العمودي الأيمن (Clean Minimal Light Sidebar) ===== -->
+    <aside id="sidebar"
+        class="fixed top-0 right-0 bottom-0 w-64 xl:w-72 bg-white border-l border-slate-200/80 z-50 flex flex-col justify-between transition-transform duration-300 ease-in-out translate-x-full lg:translate-x-0 shadow-xl lg:shadow-xs">
+        <div>
+            <!-- ترويسة الشريط: الشعار وعنوان البرنامج -->
+            <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center text-white shadow-md shadow-indigo-100 text-lg">
+                        📚
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-slate-900 text-base leading-tight">النظام التعليمي</h1>
+                        <p class="text-xs text-slate-400 font-medium">مؤسسة البراءة الخاصة</p>
+                    </div>
+                </div>
+                <!-- زر إغلاق القائمة في الموبايل -->
+                <button onclick="toggleMobileSidebar()" class="lg:hidden text-slate-400 hover:text-slate-600 p-1 rounded-lg">
+                    <i data-feather="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- بطاقة المستخدم وحالة السحابة والسنة المثبتة -->
+            <div class="p-3 mx-3 my-3 bg-slate-50 border border-slate-100 rounded-2xl flex flex-col gap-2">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <div
+                            class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-xs border border-indigo-200">
+                            👤
+                        </div>
+                        <div class="overflow-hidden">
+                            <p id="sidebarUserName" class="font-bold text-xs text-slate-800 truncate">المدير</p>
+                            <div class="flex items-center gap-1 mt-0.5">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                <span class="text-[10px] text-slate-500 font-medium">سحابة متصلة</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="pt-2 border-t border-slate-200/60 flex items-center justify-between text-[11px]">
+                    <span class="text-slate-500 font-medium">السنة المثبتة:</span>
+                    <span id="sidebarAcademicYear" class="font-extrabold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">2025/2026</span>
+                </div>
+            </div>
+
+            <!-- قائمة التنقل العمودية (تحويل البطاقات إلى أزرار وصول مباشر) -->
+            <div class="px-3 space-y-1 overflow-y-auto max-h-[calc(100vh-270px)]">
+                <p class="px-3 pt-2 pb-1 text-[11px] font-bold text-slate-400 uppercase tracking-wider">لوحة التحكم</p>
+
+                <!-- الرئيسية والنتائج -->
+                <button id="navHomeBtn" onclick="switchToHomePage()" class="sidebar-item active">
+                    <div class="flex items-center gap-3">
+                        <i data-feather="layout" class="w-4 h-4 text-indigo-600"></i>
+                        <span>الرئيسية والنتائج</span>
+                    </div>
+                </button>
+
+                <!-- قائمة التلاميذ مع العداد الحي -->
+                <button id="totalStudentsCard" class="sidebar-item" title="عرض لائحة التلاميذ">
+                    <div class="flex items-center gap-3">
+                        <i data-feather="users" class="w-4 h-4 text-emerald-600"></i>
+                        <span>قائمة التلاميذ</span>
+                    </div>
+                    <span id="totalStudents" class="badge-counter">0</span>
+                </button>
+
+                <!-- تسجيل الغياب -->
+                <button id="absenceCard" onclick="switchToAbsencePage()" class="sidebar-item" title="تسجيل وتتبع غياب التلاميذ">
+                    <div class="flex items-center gap-3">
+                        <i data-feather="user-x" class="w-4 h-4 text-rose-500"></i>
+                        <span>تسجيل الغياب</span>
+                    </div>
+                </button>
+
+                <!-- أداء الواجبات الشهرية -->
+                <button id="monthlyPerformanceCard" onclick="switchToPerformancePage()" class="sidebar-item" title="متابعة الواجبات الشهرية">
+                    <div class="flex items-center gap-3">
+                        <i data-feather="check-square" class="w-4 h-4 text-blue-600"></i>
+                        <span>الواجبات الشهرية</span>
+                    </div>
+                </button>
+
+                <!-- ترتيب الأوائل -->
+                <button id="rankingCard" class="sidebar-item" title="ترتيب الأوائل والمراكز">
+                    <div class="flex items-center gap-3">
+                        <i data-feather="award" class="w-4 h-4 text-amber-500"></i>
+                        <span>ترتيب الأوائل</span>
+                    </div>
+                </button>
+
+                <!-- التواصل عبر واتساب -->
+                <button id="whatsappSidebarBtn" onclick="openWhatsAppModal()" class="sidebar-item" title="التواصل بالواتساب مع أولياء الأمور">
+                    <div class="flex items-center gap-3">
+                        <i data-feather="message-circle" class="w-4 h-4 text-emerald-600"></i>
+                        <span>التواصل بالواتساب</span>
+                    </div>
+                    <span class="badge-counter bg-emerald-100 text-emerald-700 font-bold">واتساب</span>
+                </button>
+
+                <p class="px-3 pt-4 pb-1 text-[11px] font-bold text-slate-400 uppercase tracking-wider">الإدارة والتهيئة</p>
+
+                <!-- إعدادات النظام -->
+                <button id="openSettings" class="sidebar-item" title="إعدادات النظام والسنوات">
+                    <div class="flex items-center gap-3">
+                        <i data-feather="settings" class="w-4 h-4 text-slate-600"></i>
+                        <span>إعدادات النظام</span>
+                    </div>
+                </button>
+
+                <!-- إدارة الحسابات (أدمن فقط) -->
+                <button id="adminCard" onclick="openAdminPanel()" class="sidebar-item hidden" title="إدارة المستخدمين">
+                    <div class="flex items-center gap-3">
+                        <i data-feather="shield" class="w-4 h-4 text-purple-600"></i>
+                        <span>إدارة الحسابات</span>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- أسفل الشريط الجانبي: تسجيل الخروج -->
+        <div class="p-3 border-t border-slate-100">
+            <button id="logoutBtn" onclick="logoutUser()"
+                class="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-rose-600 hover:bg-rose-50 text-xs font-bold transition-all border border-transparent hover:border-rose-100">
+                <i data-feather="log-out" class="w-4 h-4"></i>
+                <span>تسجيل الخروج</span>
+            </button>
+            <p class="text-center text-[10px] text-slate-400 mt-2 font-medium">نظام البراءة التعليمي © 2026</p>
+        </div>
+    </aside>
+
+    <!-- ===== حاوية المحتوى الرئيسي (Main Content Wrapper) ===== -->
+    <div class="main-wrapper min-h-screen flex flex-col lg:mr-64 xl:mr-72 transition-all duration-300">
+
+        <!-- الشريط العلوي (Top Header Bar) -->
+        <header id="topHeader"
+            class="bg-white/95 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-30 px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
+            
+            <!-- الجانب الأيمن: زر القائمة في الموبايل + عنوان الشاشة -->
+            <div class="flex items-center gap-3">
+                <button onclick="toggleMobileSidebar()" class="lg:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors">
+                    <i data-feather="menu" class="w-5 h-5"></i>
+                </button>
+                <div>
+                    <h2 id="topBarPageTitle" class="font-bold text-slate-800 text-sm sm:text-base">لوحة التحكم والنتائج</h2>
+                    <p class="text-[11px] text-slate-400 hidden sm:block">إدارة بطاقات التلاميذ والتقارير الدراسية</p>
+                </div>
+            </div>
+
+            <!-- الجانب الأيسر: محدد السنة الدراسية + حالة المزامنة + أدوات التصدير والاستيراد -->
+            <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+                <!-- عرض السنة الدراسية الحالية (ثابتة في الصفحة الرئيسية ويتم تغييرها من الإعدادات فقط) -->
+                <div id="homeCurrentYearBadge" class="flex items-center gap-2 bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200/90 rounded-xl px-3.5 py-1.5 shadow-2xs" title="السنة الدراسية الحالية (يمكن تغييرها أو إدارتها من صفحة الإعدادات فقط)">
+                    <span class="text-sm">📅</span>
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-[11px] font-bold text-slate-500 hidden sm:inline">السنة الدراسية:</span>
+                        <span id="currentYearDisplayLabel" class="text-xs sm:text-sm font-extrabold text-indigo-800 tracking-wide">2026/2027</span>
+                    </div>
+                    <span class="text-[10px] font-bold bg-indigo-200/70 text-indigo-800 px-1.5 py-0.5 rounded-md hidden md:inline">الحالية</span>
+                </div>
+
+                <!-- محدد السنة القديم يبقى مخفياً في الـ DOM لدعم التوافق البرمجي التام -->
+                <div id="yearSelectorBox" class="hidden">
+                    <button id="prevYearBtn" class="hidden"></button>
+                    <select id="academicYearSelect" class="hidden"></select>
+                    <button id="nextYearBtn" class="hidden"></button>
+                </div>
+
+                <!-- مؤشر المزامنة السحابية -->
+                <div id="cloudStatus"
+                    class="hidden text-xs font-medium px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50"></div>
+
+                <!-- أزرار التصدير والاستيراد السريعة -->
+                <div class="flex items-center gap-1.5">
+                    <button id="exportBtn"
+                        class="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-bold transition-colors flex items-center gap-1">
+                        <i data-feather="download" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">تصدير</span>
+                    </button>
+                    <button id="importBtn"
+                        class="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-bold transition-colors flex items-center gap-1">
+                        <i data-feather="upload" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">استيراد</span>
+                    </button>
+                </div>
+
+                <!-- اسم المستخدم في الشريط العلوي -->
+                <span id="headerUserName" class="hidden text-xs font-bold text-indigo-700 bg-indigo-50 px-3 py-1.5 rounded-xl border border-indigo-100"></span>
+
+            </div>
+        </header>
+
+        <!-- مساحة العمل الرئيسية -->
+        <main class="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
+            <!-- عنصر غير مرئي لدعم أي مراجع قديمة لـ statsSection و statsGrid دون أخطاء -->
+            <div id="statsSection" class="hidden"><div id="statsGrid"></div></div>
+
+            <!-- Main Home Section -->
+            <section id="homePage" class="space-y-6">
+                <!-- عنصر غير مرئي لدعم أي مراجع لـ homeGreeting دون أخطاء -->
+                <div id="homeGreeting" class="hidden"></div>
+
+                <!-- بطاقات اختيار القسم والتلميذ والمعلومات السريعة (Clean Minimal) -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-right">
+                    <!-- اختيار القسم -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:border-indigo-300 transition-all">
+                        <div class="flex items-center gap-2 mb-2 text-indigo-700 font-bold text-sm">
+                            <span class="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs">🏫</span>
+                            <h3>اختيار القسم / المستوى</h3>
+                        </div>
+                        <select id="homeDeptSelect"
+                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all cursor-pointer">
+                            <option value="">-- اختر القسم --</option>
+                        </select>
+                    </div>
+
+                    <!-- اختيار التلميذ -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:border-emerald-300 transition-all">
+                        <div class="flex items-center gap-2 mb-2 text-emerald-700 font-bold text-sm">
+                            <span class="w-6 h-6 rounded-lg bg-emerald-50 flex items-center justify-center text-xs">👨‍🎓</span>
+                            <h3>اختيار التلميذ</h3>
+                        </div>
+                        <select id="homeStudentSelect"
+                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all cursor-pointer">
+                            <option value="">-- اختر تلميذ --</option>
+                        </select>
+                        <p id="homeStudentCount" class="text-xs mt-2 text-slate-500 font-medium"></p>
+                    </div>
+
+                    <!-- معلومات سريعة -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:border-amber-300 transition-all">
+                        <div class="flex items-center gap-2 mb-2 text-amber-700 font-bold text-sm">
+                            <span class="w-6 h-6 rounded-lg bg-amber-50 flex items-center justify-center text-xs">📋</span>
+                            <h3>معلومات سريعة</h3>
+                        </div>
+                        <div id="homeStudentInfo" class="text-xs text-slate-600 leading-relaxed min-h-[42px] flex items-center">
+                            <span class="text-slate-400 italic">اختر تلميذاً لعرض تفاصيله</span>
+                        </div>
+                    </div>
+                </div>
+
+            <!-- قسم عرض بيانات التلميذ والدورات -->
+            <div id="studentDisplaySection" class="hidden mt-6">
+                <div class="flex justify-between items-center mb-3">
+                    <div id="tableDeptLabel" class="text-indigo-700 font-semibold text-lg"></div>
+                    <button id="clearSelection" class="text-sm text-gray-600 hover:text-indigo-600">إلغاء
+                        التحديد</button>
+                </div>
+
+                <!-- قسم النتيجة المدرسية الجديد -->
+                <div id="newReportCard" class="mt-4">
+                    <div class="flex flex-wrap justify-center items-center gap-4 mb-4 print:hidden">
+                        <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg"
+                            onclick="printNewReport()">🖨 طباعة</button>
+                        <button class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg"
+                            onclick="printAllLevelReports()">🖨 طباعة نتائج القسم كاملاً</button>
+                        <button class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg flex items-center gap-1.5 font-medium shadow-sm transition-all"
+                            onclick="openWhatsAppForCurrentStudent()" title="مراسلة ولي أمر هذا التلميذ عبر واتساب">
+                            <span>💬 مراسلة بالواتساب</span>
+                        </button>
+                        <button id="toggleLockImagesBtn"
+                            class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg">🔒 تثبيت
+                            الصور</button>
+
+                        <div class="flex flex-col items-center gap-2">
+                            <label
+                                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg cursor-pointer text-center"
+                                for="imageInput">📷 إدراج صورة</label>
+                        </div>
+
+                        <input type="file" id="imageInput" accept="image/png, image/jpeg, image/gif" class="hidden">
+
+                        <button id="toggleShowImagesBtn" onclick="toggleImagesVisibility()"
+                            class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">👁 إخفاء
+                            الصور</button>
+
+                        <select id="reportSessionSelect"
+                            class="px-3 py-2 border rounded-lg bg-white focus:ring-2 focus:ring-indigo-500"></select>
+                    </div>
+
+                    <!-- حاوية متجاوبة للتمرير الأفقي في الشاشات الصغيرة للمحافظة على أبعاد ورقة A4 -->
+                    <div class="w-full overflow-x-auto pb-4 pt-1 flex justify-center">
+                        <div class="page" id="sheet">
+                            <h2 id="reportCardTitle" style="text-align:center; color:#2fb57f;">نموذج النتائج الدراسية
+                            </h2>
+
+                        <div
+                            style="display:flex; justify-content: space-between; align-items: flex-start; margin-bottom:12px; border-bottom: 2px solid #2fb57f; padding-bottom: 12px;">
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; flex-grow: 1;">
+                                <div><strong>المؤسسة:</strong>
+                                    <div data-field="institution" placeholder="اسم المدرسة"
+                                        style="border-bottom: 1px dotted #ccc; min-height: 18px;"></div>
+                                </div>
+                                <div><strong>المستوى:</strong>
+                                    <div contenteditable class="editable" data-field="level"
+                                        placeholder="المستوى الدراسي"></div>
+                                </div>
+                                <div><strong>السنة الدراسية:</strong>
+                                    <div contenteditable class="editable" data-field="academicYear"
+                                        placeholder="2025 / 2024"></div>
+                                </div>
+                                <div><strong>اسم الطفل(ة):</strong>
+                                    <div contenteditable class="editable" data-field="studentName"
+                                        placeholder="الاسم الكامل"></div>
+                                </div>
+                            </div>
+                            <div style="margin-right: 20px;">
+                                <img id="reportCardStudentImage"
+                                    src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="صورة التلميذ"
+                                    style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px; border: 2px solid #ddd;">
+                            </div>
+                        </div>
+
+                        <h3
+                            style="background: #2fb57f; color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 16px; margin-bottom: 10px;">
+                            تقييم الأنشطة / المواظبة و السلوك</h3>
+                        <table class="main-report-table"
+                            style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                            <thead>
+                                <tr style="background-color: #f3f4f6;">
+                                    <th style="width:20%; border: 1px solid #ddd; padding: 8px;">المجال</th>
+                                    <th style="width:35%; border: 1px solid #ddd; padding: 8px;">النشاط </th>
+                                    <th style="width:15%; border: 1px solid #ddd; padding: 8px;">التقدير</th>
+                                    <th style="width:30%; border: 1px solid #ddd; padding: 8px;">الملاحظات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reportActivitiesBody">
+                                <!-- سيتم ملء هذا القسم ديناميكياً -->
+                            </tbody>
+                        </table>
+
+                        <h3
+                            style="background: #4f46e5; color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 16px; margin-top: 15px; margin-bottom: 10px;">
+                            التقدير الإجمالي </h3>
+                        <p id="manualGradeNotice" class="manual-grade-notice print:hidden print-hidden"
+                            style="font-size:12px; color:#6b7280; margin-bottom:6px; text-align:right;">
+                            ✏️ يمكنك تعديل معدل أي مرحلة يدوياً بالنقر على الخانة. المعدلات المعدّلة تظهر باللون الأصفر.
+                            انقر ↺ للرجوع للحساب التلقائي.
+                        </p>
+                        <table
+                            style="width: 100%; border-collapse: collapse; text-align: center; font-size: 14px; margin-bottom: 15px;">
+                            <thead id="finalGradesHeader">
+                                <!-- رؤوس الأعمدة للدورات ستضاف هنا -->
+                            </thead>
+                            <tbody id="finalGradesBody">
+                                <!-- خلايا المعدلات ستضاف هنا -->
+                            </tbody>
+                        </table>
+
+                        <table
+                            style="width: 100%; border-collapse: collapse; text-align: center; font-size: 14px; margin-bottom: 20px;">
+                            <tr style="background-color: #f3f4f6;">
+                                <th colspan="4" style="border: 1px solid #ddd; padding: 8px;">قرار نتائج الدورة</th>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid #ddd; padding: 8px;"><label><input type="checkbox"
+                                            data-field="award_commendation" class="award-cb"> تنويه</label></td>
+                                <td style="border: 1px solid #ddd; padding: 8px;"><label><input type="checkbox"
+                                            data-field="award_encouragement" class="award-cb"> تشجيع</label></td>
+                                <td style="border: 1px solid #ddd; padding: 8px;"><label><input type="checkbox"
+                                            data-field="award_honor" class="award-cb"> لوحة الشرف</label></td>
+                                <td style="border: 1px solid #ddd; padding: 8px;"><label><input type="checkbox"
+                                            data-field="award_warning" class="award-cb"> تنبيه</label></td>
+                            </tr>
+                        </table>
+
+                        <table
+                            style="width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 25px; border: 1px solid #ddd;">
+                            <tr>
+                                <td style="width: 33%; padding: 8px; vertical-align: top;">
+                                    <strong>ملاحظات الأستاذ(ة)المربي(ة):</strong>
+                                    <div class="mt-2">
+                                        <select data-field="teacher_notes_select"
+                                            class="w-full border-gray-300 rounded-md p-1 report-note-select"></select>
+                                        <textarea data-field="teacher_notes_custom"
+                                            class="hidden w-full border-gray-300 rounded-md p-1 mt-2"
+                                            placeholder="اكتب ملاحظتك المخصصة هنا..."></textarea>
+                                    </div>
+                                </td>
+                                <td style="width: 33%; padding: 8px; vertical-align: top;"><strong>الغياب:</strong>
+                                    <div style="margin-top: 5px;">مبرر: <span data-field="absences_justified"
+                                            style="display: inline-block; min-width: 30px; font-weight: bold; color: #16a34a;">0</span>
+                                    </div>
+                                    <div style="margin-top: 5px;">غير مبرر: <span data-field="absences_unjustified"
+                                            style="display: inline-block; min-width: 30px; font-weight: bold; color: #dc2626;">0</span>
+                                    </div>
+                                </td>
+                                <td style="width: 33%; padding: 8px; text-align: center; vertical-align: top;">
+                                    <strong>طابع وتوقيع الإدارة</strong>
+                                    <div style="height: 60px; margin-top: 5px;"></div>
+                                </td>
+                            </tr>
+                        </table>
+                        </div> <!-- نهاية حاوية التمرير المتجاوبة لورقة النتيجة -->
+                    </div>
+
+                    <div class="flex justify-center mt-4 print:hidden">
+                        <button
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg text-lg transition-btn"
+                            onclick="printNewReport()">🖨 طباعة النتيجة</button>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Settings Section (Clean Minimal Light) -->
+        <section id="settingsPage" class="hidden bg-white rounded-2xl shadow-xs border border-slate-200/80 p-6 sm:p-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <i data-feather="settings" class="text-indigo-600"></i> إعدادات النظام
+                </h2>
+                <button id="backHome" class="text-xs sm:text-sm font-bold text-slate-600 hover:text-indigo-600 px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 flex items-center gap-1.5 transition-colors">
+                    <i data-feather="arrow-right" class="w-4 h-4"></i> رجوع للرئيسية
+                </button>
+            </div>
+
+            <div class="flex gap-3 mb-6 flex-wrap" id="settingsTabsBar">
+                <button class="tab-btn tab-active px-4 py-2 rounded-lg font-medium border border-gray-600"
+                    data-target="generalSettingsTab">⚙️ إعدادات عامة</button>
+                <button class="tab-btn px-4 py-2 rounded-lg font-medium border border-purple-600" data-target="yearsTab">📅 السنوات الدراسية</button>
+                <button class="tab-btn px-4 py-2 rounded-lg font-medium border border-indigo-600" data-target="deptsTab">🏫 الأقسام</button>
+                <button class="tab-btn px-4 py-2 rounded-lg font-medium border border-green-600"
+                    data-target="studentsTab">👨‍🎓 التلاميذ</button>
+                <button class="tab-btn px-4 py-2 rounded-lg font-medium border border-amber-600"
+                    data-target="activitiesTab">📝 الأنشطة</button>
+                <button class="tab-btn px-4 py-2 rounded-lg font-medium border border-rose-600"
+                    data-target="sessionsTab">🔄 الدورات</button>
+                <button class="tab-btn px-4 py-2 rounded-lg font-medium border border-cyan-600"
+                    data-target="observationsTab">📋 الملاحظات</button>
+                <button class="tab-btn px-4 py-2 rounded-lg font-medium border border-teal-600"
+                    data-target="performanceTab">💳 أداء الواجبات والرسوم</button>
+            </div>
+
+
+            <!-- إعدادات عامة -->
+            <div id="generalSettingsTab" class="tab-content">
+                <h3 class="text-lg font-bold text-gray-800 mb-3">إعدادات عامة</h3>
+                <div class="space-y-4 max-w-lg">
+                    <div>
+                        <label for="institutionNameInput" class="block text-sm font-medium text-gray-700 mb-1">اسم
+                            المؤسسة</label>
+                        <textarea id="institutionNameInput"
+                            placeholder="اسم المؤسسة الذي سيظهر في التقارير. يمكنك استخدام Enter لكتابة سطر جديد."
+                            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-gray-500"
+                            rows="2"></textarea>
+                    </div>
+
+                    <div id="adminFirebaseSettingsCard" class="mt-4 pt-4 border-t border-gray-200">
+                        <h4 class="font-bold text-orange-600 mb-2">☁️ إعدادات الربط السحابي (Firebase)</h4>
+                        <div class="bg-orange-50 p-3 rounded-lg text-sm mb-2 text-gray-700">
+                            إذا لم يتم الحفظ، يرجى نسخ "Realtime Database URL" من لوحة تحكم الفايربيس ولصقه هنا.<br>
+                            صيغ محتملة: <code dir="ltr">https://project-id.firebaseio.com</code> أو <code
+                                dir="ltr">https://project-id-default-rtdb.firebaseio.com</code>
+                        </div>
+                        <div class="bg-blue-50 p-3 rounded-lg text-sm mb-2 text-blue-800">
+                            💡 <strong>ملاحظة لبروتوكول file://:</strong> عند فتح الملف مباشرة (Double Click)، يرجى
+                            التأكد من أن قواعد الحماية (Rules) في Firebase تسمح بالقراءة والكتابة بدون تسجيل دخول، أو قم
+                            بتشغيل خادم محلي (Local Server) لتفعيل المزامنة التلقائية.
+                        </div>
+                        <label for="firebaseDbUrlInput" class="block text-sm font-medium text-gray-700 mb-1">رابط
+                            قاعدة
+                            البيانات (Database URL)</label>
+                        <input type="text" id="firebaseDbUrlInput" placeholder="https://..." dir="ltr"
+                            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 mb-2">
+                        <button id="saveFirebaseConfig"
+                            class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg w-full">حفظ
+                            إعدادات
+                            الربط</button>
+                    </div>
+
+                    <div class="mt-4 pt-4 border-t border-gray-200">
+                        <h4 class="font-bold text-amber-600 mb-2">⚡ استرجاع البيانات والنسخ الاحتياطية</h4>
+                        <p class="text-sm text-gray-600 mb-3">إذا لاحظت اختفاء الأقسام أو التلاميذ بعد تسجيل الدخول كمدير، يمكنك فحص التخزين واسترجاعها بنقرة واحدة:</p>
+                        <button type="button" onclick="openDataRecoveryModal()"
+                            class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2.5 rounded-lg w-full flex items-center justify-center gap-2 font-bold shadow-sm transition-btn">
+                            🔍 فحص واسترجاع البيانات السابقة
+                        </button>
+                    </div>
+
+                    <!-- إعداد الرقم السري لعمليات الحذف -->
+                    <div class="mt-4 pt-4 border-t border-gray-200">
+                        <h4 class="font-bold text-rose-600 mb-1 flex items-center gap-1.5">
+                            <span>🔒</span>
+                            <span>الرقم السري لعمليات الحذف</span>
+                        </h4>
+                        <p class="text-xs text-gray-600 mb-3">
+                            يُطلب هذا الرقم السري للتأكيد قبل تنفيذ أي عملية حذف (حذف تلميذ، قسم، سنة دراسية، دورة، إلخ). يمكنك تعديله من هنا:
+                        </p>
+                        <div class="bg-rose-50 border border-rose-200 rounded-xl p-3.5 space-y-3">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="text-xs font-bold text-gray-700 block mb-1">الرقم السري الجديد:</label>
+                                    <input type="password" id="newDeletePinInput" placeholder="أدخل الرقم السري الجديد"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-rose-500 bg-white">
+                                </div>
+                                <div>
+                                    <label class="text-xs font-bold text-gray-700 block mb-1">تأكيد الرقم السري:</label>
+                                    <input type="password" id="confirmDeletePinInput" placeholder="أعد إدخال الرقم السري"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-rose-500 bg-white">
+                                </div>
+                            </div>
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1">
+                                <span class="text-[11px] text-gray-600">الرقم السري الافتراضي للنظام: <strong class="font-mono text-rose-700 bg-rose-100 px-1.5 py-0.5 rounded">1234</strong></span>
+                                <button type="button" onclick="saveNewDeletePin()"
+                                    class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition-btn shadow-xs flex items-center justify-center gap-1">
+                                    💾 حفظ الرقم السري الجديد
+                                </button>
+                            </div>
+                            <p id="deletePinStatusMsg" class="text-xs font-bold hidden"></p>
+                        </div>
+                    </div>
+
+                    <!-- بطاقة تحديد الأقسام الخاصة بي للمشترك -->
+                    <div id="subscriberDeptsSettingsCard" class="mt-4 pt-4 border-t border-gray-200 hidden">
+                        <h4 class="font-bold text-indigo-700 mb-1 flex items-center gap-1.5">
+                            <span>🏫</span>
+                            <span>تحديد الأقسام الخاصة بي</span>
+                        </h4>
+                        <p class="text-xs text-gray-600 mb-3">
+                            يمكنك من هنا تحديد واختيار الأقسام التي تدرسها لتظهر وحدها مع تلاميذها في حسابك:
+                        </p>
+                        <div class="bg-indigo-50/80 border border-indigo-200 rounded-xl p-3.5 space-y-3">
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="font-medium text-gray-700">الأقسام المحددة حالياً:</span>
+                                <span id="subscriberCurrentDeptsLabel" class="font-bold text-indigo-700">كل الأقسام</span>
+                            </div>
+                            <button type="button" onclick="openMyDepartmentsModal()"
+                                class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-lg text-xs transition-colors flex items-center justify-center gap-2 shadow-2xs">
+                                ✏️ تعديل واختيار الأقسام الخاصة بي
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- السنوات الدراسية -->
+            <div id="yearsTab" class="tab-content hidden">
+                <!-- بطاقة تحديد السنة الحالية في الإعدادات -->
+                <div class="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-2xl p-4 mb-6 shadow-2xs">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                            <h4 class="font-bold text-sm text-purple-900 flex items-center gap-1.5">
+                                <span>🎯</span>
+                                <span>السنة الدراسية المعتمدة حالياً في البرنامج</span>
+                            </h4>
+                            <p class="text-xs text-purple-700 mt-0.5">
+                                السنة النشطة حالياً هي: <strong id="settingsActiveYearBadge" class="bg-purple-200 text-purple-900 px-2 py-0.5 rounded-md font-mono font-extrabold text-sm">2026/2027</strong>. يمكنك تغييرها من هنا لتحديث كل بطاقات وتلاميذ البرنامج:
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label for="settingsCurrentYearSelect" class="text-xs font-bold text-purple-900">تغيير إلى:</label>
+                            <select id="settingsCurrentYearSelect" onchange="setCurrentYear(this.value)"
+                                class="px-3 py-2 border border-purple-300 rounded-xl text-xs font-bold text-purple-900 bg-white focus:ring-2 focus:ring-purple-500 cursor-pointer shadow-2xs">
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <form id="yearForm" class="flex flex-col sm:flex-row gap-3 mb-6">
+                    <input type="text" id="yearName" placeholder="مثال: 2026/2027" required
+                        class="flex-grow px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    <button type="submit"
+                        class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg flex items-center gap-1 transition-btn">
+                        <i data-feather="plus"></i> إضافة سنة
+                    </button>
+                </form>
+                <ul id="yearList" class="space-y-2"></ul>
+            </div>
+
+            <!-- الأقسام -->
+            <div id="deptsTab" class="tab-content hidden">
+                <div id="deptsTabSubscriberNotice" class="bg-indigo-50 border border-indigo-200 rounded-xl p-3 mb-4 flex flex-col sm:flex-row justify-between items-center gap-2 hidden">
+                    <div>
+                        <p class="text-xs font-bold text-indigo-900">هل ترغب في تحديد الأقسام الخاصة بك فقط؟</p>
+                        <p class="text-[11px] text-indigo-600">يمكنك اختيار الأقسام التي تخصك بدلاً من عرض جميع أقسام المؤسسة.</p>
+                    </div>
+                    <button type="button" onclick="openMyDepartmentsModal()"
+                        class="bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-bold shrink-0 shadow-2xs">
+                        🎯 تحديد أقسامي
+                    </button>
+                </div>
+                <input type="text" id="deptSearch" placeholder="بحث في الأقسام..."
+                    class="w-full mb-3 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500">
+                <form id="deptForm" class="flex flex-col sm:flex-row gap-3 mb-6">
+                    <input type="text" id="deptName" placeholder="اسم القسم" required
+                        class="flex-grow px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                    <button type="submit"
+                        class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg flex items-center gap-1 transition-btn">
+                        <i data-feather="plus"></i> إضافة
+                    </button>
+                </form>
+                <ul id="deptList" class="space-y-2"></ul>
+            </div>
+
+            <!-- التلاميذ -->
+            <div id="studentsTab" class="tab-content hidden">
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2 font-medium">السنة الدراسية:</label>
+                    <select id="yearSelectForStudents"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 bg-white"></select>
+                </div>
+                <div class="mb-3 flex gap-2">
+                    <input type="text" id="studentSearch" placeholder="بحث في التلاميذ..."
+                        class="flex-grow px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2 font-medium">القسم:</label>
+                    <select id="deptSelectForStudents"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500"></select>
+                </div>
+
+                <button id="addStudentBtn"
+                    class="w-full bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg flex items-center justify-center gap-1 transition-btn mb-6">
+                    <i data-feather="user-plus"></i> إضافة تلميذ جديد
+                </button>
+                <ul id="studentList" class="space-y-2"></ul>
+            </div>
+
+            <!-- الأنشطة -->
+            <div id="activitiesTab" class="tab-content hidden">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-800 mb-3">بنود التقييم (الأنشطة والسلوك)</h3>
+                    <form id="reportActivityForm" class="flex flex-col sm:flex-row gap-2 mb-4">
+                        <input type="text" id="reportActivityName" placeholder="اسم البند الجديد (نشاط أو سلوك)"
+                            required class="flex-grow px-3 py-2 border rounded-lg">
+                        <select id="reportActivityDept" class="px-3 py-2 border rounded-lg bg-white">
+                            <option value="all">كل المستويات</option>
+                        </select>
+                        <button type="submit"
+                            class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg">إضافة</button>
+                    </form>
+                    <ul id="reportActivityList" class="space-y-2">
+                        <!-- قائمة بنود السلوك ستعرض هنا -->
+                    </ul>
+                </div>
+            </div>
+
+            <!-- الدورات -->
+            <div id="sessionsTab" class="tab-content hidden">
+                <h3 class="text-lg font-bold text-gray-800 mb-3">إدارة الدورات الدراسية</h3>
+                <p class="text-sm text-gray-600 mb-4">هذه الدورات ستظهر في نموذج النتائج لحفظ تقييمات كل دورة على
+                    حدة.
+                </p>
+                <form id="sessionForm" class="flex gap-2 mb-4">
+                    <input type="text" id="sessionName" placeholder="اسم الدورة الجديدة (مثال: الدورة الأولى)" required
+                        class="flex-grow px-3 py-2 border rounded-lg">
+                    <button type="submit" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg">إضافة
+                        دورة</button>
+                </form>
+                <ul id="sessionList" class="space-y-2">
+                    <!-- قائمة الدورات ستعرض هنا -->
+                </ul>
+            </div>
+            <!-- الملاحظات العامة -->
+            <div id="observationsTab" class="tab-content hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-800 mb-3">ملاحظات الأستاذ(ة):</h3>
+                        <p class="text-sm text-gray-600 mb-4">هذه الملاحظات ستظهر كخيارات جاهزة ضمن حقل "ملاحظات
+                            الأستاذ(ة)" في بطاقة النتائج.</p>
+                        <form id="observationForm" class="flex gap-2 mb-4">
+                            <input type="text" id="observationName" placeholder="نص الملاحظة الجديدة" required
+                                class="flex-grow px-3 py-2 border rounded-lg">
+                            <button type="submit"
+                                class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg">إضافة</button>
+                        </form>
+                        <ul id="observationList" class="space-y-2">
+                            <!-- قائمة الملاحظات ستعرض هنا -->
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-800 mb-3">💯 الملاحظات التلقائية حسب النقطة</h3>
+                        <p class="text-sm text-gray-600 mb-4">بمجرد إدخال نقطة في النتيجة، ستظهر الملاحظة المرتبطة
+                            بها
+                            تلقائياً.</p>
+                        <form id="scoreObservationForm" class="grid grid-cols-4 gap-2 mb-4 items-center">
+                            <input type="number" id="scoreObsMin" placeholder="من" required
+                                class="px-3 py-2 border rounded-lg" step="0.01">
+                            <input type="number" id="scoreObsMax" placeholder="إلى" required
+                                class="px-3 py-2 border rounded-lg" step="0.01">
+                            <input type="text" id="scoreObsText" placeholder="نص الملاحظة" required
+                                class="col-span-2 px-3 py-2 border rounded-lg">
+                            <button type="submit"
+                                class="col-span-4 bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg mt-2">إضافة
+                                ملاحظة بالنقطة</button>
+                        </form>
+                        <ul id="scoreObservationList" class="space-y-2">
+                            <!-- قائمة الملاحظات حسب النقطة -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- أداء الواجبات الشهرية والرسوم -->
+            <div id="performanceTab" class="tab-content hidden space-y-6">
+                <!-- شريط تعريفي وتوضيحي -->
+                <div class="bg-gradient-to-r from-teal-50 to-emerald-50 border border-teal-200 rounded-2xl p-5 shadow-2xs">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-teal-600 text-white flex items-center justify-center text-xl shadow-inner shrink-0">
+                                💳
+                            </div>
+                            <div>
+                                <h3 class="font-extrabold text-base text-teal-950">إعدادات أداء الواجبات الشهرية والرسوم</h3>
+                                <p class="text-xs text-teal-700 mt-0.5">
+                                    حدد أشهر الدراسة المعتمدة، وأضف أي واجبات إضافية أخرى (مثل واجب التسجيل، التأمين، النقل، إلخ).
+                                </p>
+                            </div>
+                        </div>
+                        <button type="button" onclick="restoreDefaultPerformanceConfig()"
+                            class="text-xs font-bold text-teal-800 bg-white hover:bg-teal-100 px-3.5 py-2 rounded-xl border border-teal-300 shadow-2xs transition-colors shrink-0 flex items-center gap-1.5">
+                            <span>🔄</span>
+                            <span>استعادة الافتراضي</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- القسم 1: التحكم في أشهر أداء الواجبات -->
+                    <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-2xs space-y-4">
+                        <div class="flex justify-between items-center pb-3 border-b border-slate-100">
+                            <div>
+                                <h4 class="font-bold text-sm text-slate-900 flex items-center gap-1.5">
+                                    <span>📅</span>
+                                    <span>أشهر السنة الدراسية المعتمدة للواجبات</span>
+                                </h4>
+                                <p class="text-xs text-slate-500">اختر الأشهر التي تود اعتمادها في نظام الأداء الشهري:</p>
+                            </div>
+                            <span id="activeMonthsCountBadge" class="text-xs font-bold px-2 py-0.5 rounded-full bg-teal-100 text-teal-800">
+                                11 شهر مفعل
+                            </span>
+                        </div>
+
+                        <!-- أزرار الاختيار السريع للأشهر -->
+                        <div class="flex flex-wrap gap-2 pt-1">
+                            <button type="button" onclick="setAllMonths(true)"
+                                class="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-teal-50 hover:bg-teal-100 text-teal-700 border border-teal-200 transition-colors">
+                                ✅ تحديد الكل (12 شهراً)
+                            </button>
+                            <button type="button" onclick="setBasicMonths()"
+                                class="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition-colors">
+                                🏫 شتنبر إلى يونيو (10 أشهر)
+                            </button>
+                            <button type="button" onclick="setAllMonths(false)"
+                                class="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 transition-colors">
+                                ❌ إلغاء تحديد الكل
+                            </button>
+                        </div>
+
+                        <!-- شبكة الأشهر مع مفاتيح التفعيل -->
+                        <div id="monthsCheckboxGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pt-2">
+                            <!-- تولد ديناميكياً -->
+                        </div>
+                    </div>
+
+                    <!-- القسم 2: إضافة أداءات وواجبات أخرى -->
+                    <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-2xs space-y-4">
+                        <div class="flex justify-between items-center pb-3 border-b border-slate-100">
+                            <div>
+                                <h4 class="font-bold text-sm text-slate-900 flex items-center gap-1.5">
+                                    <span>➕</span>
+                                    <span>إضافة أداءات ورسوم أخرى</span>
+                                </h4>
+                                <p class="text-xs text-slate-500">واجبات غير شهرية (مثل التسجيل، التأمين، النقل، الأنشطة):</p>
+                            </div>
+                            <span id="customDutiesCountBadge" class="text-xs font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800">
+                                0 أداء إضافي
+                            </span>
+                        </div>
+
+                        <!-- نموذج إضافة أداء جديد -->
+                        <form id="addCustomDutyForm" onsubmit="event.preventDefault(); submitNewCustomDuty();" class="flex gap-2">
+                            <input type="text" id="newCustomDutyInput" placeholder="اكتب اسم الأداء (مثال: واجب التسجيل)..."
+                                class="flex-grow px-3.5 py-2 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-teal-500 font-medium">
+                            <button type="submit"
+                                class="bg-teal-600 hover:bg-teal-700 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1 shrink-0 shadow-2xs transition-colors">
+                                <span>➕ إضافة</span>
+                            </button>
+                        </form>
+
+                        <!-- اقتراحات سريعة بنقرة واحدة -->
+                        <div>
+                            <span class="text-[11px] font-bold text-slate-400 block mb-1.5">اقتراحات سريعة (انقر للإضافة الفورية):</span>
+                            <div class="flex flex-wrap gap-1.5">
+                                <button type="button" onclick="quickAddDuty('واجب التسجيل السنوي')" class="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 transition-colors">+ واجب التسجيل</button>
+                                <button type="button" onclick="quickAddDuty('واجب التأمين المدرسي')" class="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 transition-colors">+ التأمين المدرسي</button>
+                                <button type="button" onclick="quickAddDuty('واجب النقل المدرسي')" class="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 transition-colors">+ النقل المدرسي</button>
+                                <button type="button" onclick="quickAddDuty('واجب الأنشطة الموازية والرحلات')" class="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-200 transition-colors">+ الأنشطة الموازية</button>
+                                <button type="button" onclick="quickAddDuty('واجب الكتب واللوازم المدرسية')" class="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 transition-colors">+ الكتب واللوازم</button>
+                            </div>
+                        </div>
+
+                        <!-- قائمة الأداءات المضافة -->
+                        <div class="space-y-2 pt-2">
+                            <span class="text-xs font-bold text-slate-700 block">قائمة الأداءات الإضافية المسجلة:</span>
+                            <div id="customDutiesList" class="space-y-1.5 max-h-56 overflow-y-auto">
+                                <!-- تولد ديناميكياً -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- معاينة القائمة النهائية التي تظهر في نافذة إدخال الأداء -->
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4">
+                    <h4 class="font-bold text-xs text-slate-700 mb-2 flex items-center gap-1.5">
+                        <span>👁️</span>
+                        <span>معاينة عناصر الأداء التي ستظهر في نافذة "الواجبات الشهرية والرسوم":</span>
+                    </h4>
+                    <div id="performanceActiveSummaryPreview" class="flex flex-wrap gap-2 text-xs">
+                        <!-- تظهر هنا الشارات -->
+                    </div>
+                </div>
+            </div>
+
+
+        </section>
+
+        <!-- صفحة تتبع الواجبات الشهرية والشهور (الجدول المتقاطع) -->
+        <section id="performancePage" class="hidden bg-white rounded-2xl shadow-xs border border-slate-200/80 p-5 sm:p-7 space-y-5">
+            <!-- الهيدر الرئيسي مع زر الرجوع للرئيسية -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-2xl bg-teal-50 border border-teal-200 text-teal-700 flex items-center justify-center text-2xl shadow-2xs">
+                        📊
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-extrabold text-slate-800 flex items-center gap-2">
+                            الجدول المتقاطع لتتبع أداء الواجبات والشهور
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-0.5">متابعة دقيقة لكل مستوى وأشهر السنة مع استخراج وصولات A5 بنسختين وكشوفات الحساب السنوية</p>
+                    </div>
+                </div>
+                <button type="button" onclick="switchToHomePage()"
+                    class="px-4 py-2 rounded-xl text-xs font-bold text-slate-700 hover:text-indigo-600 bg-slate-50 hover:bg-slate-100 border border-slate-300 flex items-center gap-1.5 transition-colors self-start sm:self-auto shadow-2xs">
+                    <i data-feather="arrow-right" class="w-4 h-4"></i>
+                    <span>رجوع للرئيسية</span>
+                </button>
+            </div>
+
+            <!-- شريط التحكم وتحديد المستوى والتصفية والبحث والطباعة -->
+            <div class="bg-slate-50/80 border border-slate-200 rounded-2xl p-4 space-y-3">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <!-- تحديد المستوى / القسم -->
+                    <div class="flex items-center gap-2 flex-grow sm:flex-grow-0 min-w-[260px]">
+                        <label for="perfDeptSelect" class="text-xs font-bold text-slate-700 shrink-0 flex items-center gap-1">
+                            <span>🏫</span>
+                            <span>تحديد المستوى / القسم:</span>
+                        </label>
+                        <select id="perfDeptSelect" onchange="onPerfDeptChanged()"
+                            class="w-full sm:w-64 px-3 py-2 border border-teal-300 rounded-xl focus:ring-2 focus:ring-teal-500 text-xs font-bold text-teal-950 bg-white shadow-2xs cursor-pointer">
+                            <option value="">-- اختر المستوى / القسم --</option>
+                        </select>
+                    </div>
+
+                    <!-- أزرار التصفية -->
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                        <span class="text-[11px] font-bold text-slate-400 ml-1">التصفية:</span>
+                        <button type="button" id="perfFilterAllBtn" onclick="setPerfFilter('all')"
+                            class="px-3 py-1.5 rounded-xl text-xs font-bold bg-teal-600 text-white shadow-2xs transition-all">الكل (<span id="filterCountAll">0</span>)</button>
+                        <button type="button" id="perfFilterPaidBtn" onclick="setPerfFilter('paid')"
+                            class="px-3 py-1.5 rounded-xl text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-all">✅ المسددون بالكامل (<span id="filterCountPaid">0</span>)</button>
+                        <button type="button" id="perfFilterUnpaidBtn" onclick="setPerfFilter('unpaid')"
+                            class="px-3 py-1.5 rounded-xl text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-all">⚠️ عليهم متأخرات (<span id="filterCountUnpaid">0</span>)</button>
+                    </div>
+
+                    <!-- حقل البحث السريع بالاسم -->
+                    <div class="flex items-center gap-2">
+                        <input type="text" id="perfSearchInput" oninput="onPerfSearchChanged()" placeholder="🔍 بحث باسم التلميذ..."
+                            class="px-3 py-1.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 text-xs font-medium bg-white w-48 shadow-2xs">
+                    </div>
+
+                    <!-- إجراءات الطباعة والمراسلة -->
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="printCurrentPerfViewReport()" title="طباعة الجدول المتقاطع للمستوى على ورقة A4 عرضية"
+                            class="bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors shadow-2xs">
+                            <span>🖨️ طباعة الجدول كاملاً (A4 عرضي)</span>
+                        </button>
+                        <button type="button" id="perfRemindAllBtn" onclick="remindAllUnpaidWhatsApp()" title="تذكير جميع المتأخرين بالواتساب"
+                            class="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors shadow-2xs">
+                            <span>💬 تذكير المتأخرين</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- شريط أزرار المستويات السريعة للتبديل الفوري بين المستويات بنقرة واحدة -->
+                <div id="perfDeptChipsBar" class="flex items-center gap-1.5 flex-wrap pt-2.5 border-t border-slate-200/80">
+                    <span class="text-[11px] font-bold text-slate-500 ml-1">المستويات السريعة:</span>
+                    <div id="perfDeptChipsList" class="flex items-center gap-1.5 flex-wrap">
+                        <!-- يتم ملؤها ديناميكياً -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- حاوية الجدول المتقاطع الرئيسي -->
+            <div class="overflow-x-auto rounded-2xl border border-slate-200 shadow-2xs bg-white" id="perfStudentsList">
+                <div class="text-center py-16 text-slate-400">
+                    <span class="text-5xl block mb-3">🏫</span>
+                    <h4 class="font-extrabold text-base text-slate-700">يرجى تحديد المستوى / القسم أولاً</h4>
+                    <p class="text-xs text-slate-400 mt-1">اختر قسماً من القائمة أو انقر على أحد أزرار المستويات أعلاه لعرض الجدول المتقاطع لتتبع الأشهر والواجبات</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- صفحة تسجيل وتتبع غياب التلاميذ المستقلة -->
+        <section id="absencePage" class="hidden bg-white rounded-2xl shadow-xs border border-slate-200/80 p-5 sm:p-7 space-y-6">
+            <!-- الهيدر الرئيسي مع زر الرجوع وزر الطباعة -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-rose-500 to-rose-600 text-white flex items-center justify-center text-xl shadow-md shadow-rose-200 shrink-0">
+                        📋
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-extrabold text-slate-800 flex items-center gap-2">
+                            <span>تسجيل وتتبع غياب التلاميذ</span>
+                            <span class="text-[11px] px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-700 font-extrabold">سلس وسريع</span>
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-0.5">متابعة دقيقة لحضور وغياب التلاميذ مع أزرار الزيادة والنقصان السريعة (+ / -) وإرسال إشعارات فورية عبر واتساب</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+                    <button type="button" onclick="printAbsenceSheet()"
+                        class="px-3.5 py-2 rounded-xl text-xs font-bold text-slate-700 hover:text-indigo-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 flex items-center gap-1.5 transition-colors shadow-2xs">
+                        <span>🖨️</span>
+                        <span>طباعة لائحة الغياب</span>
+                    </button>
+                    <button type="button" onclick="switchToHomePage()"
+                        class="px-4 py-2 rounded-xl text-xs font-bold text-slate-700 hover:text-indigo-600 bg-slate-50 hover:bg-slate-100 border border-slate-300 flex items-center gap-1.5 transition-colors shadow-2xs">
+                        <i data-feather="arrow-right" class="w-4 h-4"></i>
+                        <span>رجوع للرئيسية</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- شريط التحكم: تحديد القسم والدورة والبحث والفلترة السريعة -->
+            <div class="bg-slate-50/90 border border-slate-200/90 rounded-2xl p-4 sm:p-5 space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-3.5 items-center">
+                    <!-- تحديد المستوى / القسم -->
+                    <div class="md:col-span-5 flex flex-col gap-1.5">
+                        <label for="absDeptSelect" class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                            <span>🏫</span>
+                            <span>المستوى / القسم:</span>
+                        </label>
+                        <select id="absDeptSelect" onchange="onAbsenceDeptOrSessionChange()"
+                            class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all cursor-pointer shadow-2xs">
+                            <option value="">-- اختر المستوى / القسم --</option>
+                        </select>
+                    </div>
+
+                    <!-- تحديد الدورة الدراسية -->
+                    <div class="md:col-span-4 flex flex-col gap-1.5">
+                        <label for="absSessionSelect" class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                            <span>📅</span>
+                            <span>الدورة الدراسية:</span>
+                        </label>
+                        <select id="absSessionSelect" onchange="onAbsenceDeptOrSessionChange()"
+                            class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all cursor-pointer shadow-2xs">
+                        </select>
+                    </div>
+
+                    <!-- بحث فوري بالاسم -->
+                    <div class="md:col-span-3 flex flex-col gap-1.5">
+                        <label for="absSearchInput" class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                            <span>🔍</span>
+                            <span>بحث عن تلميذ:</span>
+                        </label>
+                        <div class="relative">
+                            <input type="text" id="absSearchInput" oninput="renderAbsenceList()" placeholder="ابحث باسم التلميذ..."
+                                class="w-full pl-8 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all shadow-2xs">
+                            <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none">🔍</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- شرائح اختيار الأقسام السريعة + فلاتر الحالة -->
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pt-2 border-t border-slate-200/70">
+                    <!-- شرائح الأقسام -->
+                    <div id="absDeptChips" class="flex items-center gap-1.5 flex-wrap">
+                        <!-- تُضاف ديناميكياً -->
+                    </div>
+
+                    <!-- أزرار تصفية الحالات -->
+                    <div class="flex items-center gap-1.5 flex-wrap bg-white p-1 rounded-xl border border-slate-200 shadow-2xs self-start lg:self-auto">
+                        <button type="button" onclick="setAbsenceFilter('all')" id="absFilterBtn_all"
+                            class="abs-filter-btn active px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 bg-rose-50 text-rose-700 border border-rose-200">
+                            <span>🌟 الجميع</span>
+                            <span id="absCount_all" class="text-[10px] bg-rose-200/80 px-1.5 py-0.2 rounded-full">0</span>
+                        </button>
+                        <button type="button" onclick="setAbsenceFilter('absent')" id="absFilterBtn_absent"
+                            class="abs-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all flex items-center gap-1.5">
+                            <span>🚨 لديهم غياب</span>
+                            <span id="absCount_absent" class="text-[10px] bg-slate-200 px-1.5 py-0.2 rounded-full">0</span>
+                        </button>
+                        <button type="button" onclick="setAbsenceFilter('present')" id="absFilterBtn_present"
+                            class="abs-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all flex items-center gap-1.5">
+                            <span>✨ مواظبون 100%</span>
+                            <span id="absCount_present" class="text-[10px] bg-slate-200 px-1.5 py-0.2 rounded-full">0</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- بطاقات الإحصائيات السريعة (KPIs) -->
+            <div id="absKpiCards" class="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+                <div class="bg-gradient-to-br from-indigo-50 to-white border border-indigo-100 p-4 rounded-2xl shadow-2xs flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] font-bold text-indigo-600">إجمالي التلاميذ</p>
+                        <h4 id="absKpiTotalStudents" class="text-xl font-extrabold text-indigo-900 mt-0.5">0</h4>
+                    </div>
+                    <span class="text-2xl p-2.5 bg-indigo-100/70 rounded-xl">👨‍🎓</span>
+                </div>
+                <div class="bg-gradient-to-br from-sky-50 to-white border border-sky-100 p-4 rounded-2xl shadow-2xs flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] font-bold text-sky-600">غياب مبرر</p>
+                        <h4 id="absKpiJustified" class="text-xl font-extrabold text-sky-900 mt-0.5">0 يوم</h4>
+                    </div>
+                    <span class="text-2xl p-2.5 bg-sky-100/70 rounded-xl">📝</span>
+                </div>
+                <div class="bg-gradient-to-br from-rose-50 to-white border border-rose-100 p-4 rounded-2xl shadow-2xs flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] font-bold text-rose-600">غياب غير مبرر</p>
+                        <h4 id="absKpiUnjustified" class="text-xl font-extrabold text-rose-900 mt-0.5">0 يوم</h4>
+                    </div>
+                    <span class="text-2xl p-2.5 bg-rose-100/70 rounded-xl">⚠️</span>
+                </div>
+                <div class="bg-gradient-to-br from-emerald-50 to-white border border-emerald-100 p-4 rounded-2xl shadow-2xs flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] font-bold text-emerald-600">نسبة المواظبة</p>
+                        <h4 id="absKpiRate" class="text-xl font-extrabold text-emerald-900 mt-0.5">100%</h4>
+                    </div>
+                    <span class="text-2xl p-2.5 bg-emerald-100/70 rounded-xl">✨</span>
+                </div>
+            </div>
+
+            <!-- قائمة وجدول تسجيل الغياب -->
+            <div id="absStudentsList" class="min-h-[250px]">
+                <!-- يتم تعبئتها ديناميكياً -->
+            </div>
+        </section>
+        </main>
+    </div> <!-- نهاية حاوية المحتوى الرئيسي main-wrapper -->
+
+    <!-- Modal اختيار نوع البند -->
+    <div id="addItemTypeModal"
+        class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <div class="bg-white rounded-xl p-6 w-96 shadow-lg">
+            <h3 class="text-lg font-bold mb-4">اختر نوع البند</h3>
+            <div class="flex flex-col gap-4">
+                <button id="addActivityTypeBtn" class="w-full text-left p-4 rounded-lg bg-amber-100 hover:bg-amber-200">
+                    <strong class="text-amber-800">نشاط (تقدير نصي)</strong>
+                    <p class="text-sm text-gray-600">مثل: القرآن الكريم، الرياضيات (يتم تقييمه بنص مثل: جيد،
+                        حسن...).
+                    </p>
+                </button>
+                <button id="addBehaviorTypeBtn" class="w-full text-left p-4 rounded-lg bg-blue-100 hover:bg-blue-200">
+                    <strong class="text-blue-800">سلوك (تقييم رقمي)</strong>
+                    <p class="text-sm text-gray-600">مثل: المواظبة، المشاركة (يتم تقييمه برقم من 0 إلى 10).</p>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal تأكيد الحذف بالرقم السري -->
+    <div id="modalConfirm" class="hidden fixed inset-0 bg-black/60 backdrop-blur-xs flex justify-center items-center z-[1000] p-4 transition-all">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl border border-rose-100 transform transition-all">
+            <div class="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+                <div class="w-10 h-10 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center text-xl shrink-0">
+                    🗑️
+                </div>
+                <div>
+                    <h3 class="font-bold text-gray-900 text-base">تأكيد عملية الحذف</h3>
+                    <p class="text-xs text-gray-500">يتطلب هذا الإجراء إدخال الرقم السري للحماية</p>
+                </div>
+            </div>
+
+            <p class="mb-4 text-sm font-semibold text-gray-800 bg-gray-50 p-3 rounded-xl border border-gray-200" id="modalText">
+                هل أنت متأكد من الحذف؟
+            </p>
+
+            <div class="mb-4">
+                <label for="deletePinInput" class="block text-xs font-bold text-gray-700 mb-1.5">
+                    🔐 أدخل الرقم السري لتأكيد الحذف:
+                </label>
+                <div class="relative">
+                    <input type="password" id="deletePinInput" placeholder="أدخل الرقم السري" autocomplete="off"
+                        class="w-full px-3.5 py-2.5 border-2 border-rose-200 rounded-xl text-center text-lg tracking-widest font-mono font-bold focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-rose-50/30">
+                    <button type="button" onclick="toggleDeletePinVisibility()"
+                        class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm p-1">
+                        👁️
+                    </button>
+                </div>
+                <p id="modalPinError" class="text-xs text-rose-600 font-bold mt-2 hidden flex items-center gap-1">
+                    <span>⚠️</span> <span id="modalPinErrorText">الرقم السري غير صحيح!</span>
+                </p>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-2">
+                <button id="modalCancel" type="button"
+                    class="px-5 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-bold transition-colors">
+                    إلغاء
+                </button>
+                <button id="modalConfirmBtn" type="button"
+                    class="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold shadow-md shadow-rose-200 transition-colors flex items-center gap-1.5">
+                    <span>🗑️</span>
+                    <span>تأكيد الحذف</span>
+                </button>
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
+                <span>الرمز الافتراضي: <strong class="font-mono text-rose-700 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-100">1234</strong></span>
+                <button type="button" onclick="goToChangePinSettings()" class="text-indigo-600 hover:text-indigo-800 font-bold underline flex items-center gap-1 transition-colors">
+                    ⚙️ تعديل الرقم السري من الإعدادات
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal قائمة جميع التلاميذ -->
+    <div id="allStudentsModal"
+        class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
+        <div class="bg-white rounded-xl p-6 w-full max-w-3xl shadow-lg max-h-full flex flex-col">
+            <div class="flex justify-between items-center mb-4 border-b pb-3">
+                <h3 class="text-xl font-bold text-green-700">قائمة جميع التلاميذ (<span id="allStudentsCount">0</span>)
+                </h3>
+                <button type="button" id="allStudentsModalClose"
+                    class="text-gray-500 hover:text-gray-800 text-2xl font-bold">&times;</button>
+            </div>
+            <input type="text" id="allStudentsSearch" placeholder="بحث بالاسم أو القسم..."
+                class="w-full px-4 py-2 border rounded-lg mb-4">
+            <div class="overflow-y-auto">
+                <ul id="allStudentsList" class="space-y-2">
+                    <!-- قائمة التلاميذ ستضاف هنا -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal ترتيب المراكز -->
+    <div id="rankingModal"
+        class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
+        <div class="bg-white rounded-xl p-6 w-full max-w-2xl shadow-lg max-h-full flex flex-col">
+            <div class="flex justify-between items-center mb-4 border-b pb-3">
+                <h3 class="text-xl font-bold text-amber-700">🏆 ترتيب الأوائل حسب المستوى</h3>
+                <div class="flex gap-2">
+                    <button onclick="printRankingList()"
+                        class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded-lg text-sm">🖨 طباعة
+                        اللائحة</button>
+                    <button type="button" onclick="document.getElementById('rankingModal').classList.add('hidden')"
+                        class="text-gray-500 hover:text-gray-800 text-2xl font-bold">&times;</button>
+                </div>
+            </div>
+            <div class="mb-4">
+                <select id="rankingDeptSelect"
+                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500">
+                    <option value="">-- اختر القسم/المستوى لعرض الترتيب --</option>
+                </select>
+            </div>
+            <div class="overflow-y-auto" id="rankingResultList">
+                <p class="text-center text-gray-500">اختر قسماً لعرض ترتيب التلاميذ...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- تم نقل واجهة تسجيل الغياب كصفحة مستقلة كاملة #absencePage أعلاه لسهولة وسلاسة الاستخدام -->
+
+
+
+    <!-- Modal بطاقة التلميذ -->
+    <div id="studentModal"
+        class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
+        <div class="bg-white rounded-xl p-6 w-full max-w-2xl shadow-lg max-h-full overflow-y-auto">
+            <h3 id="studentModalTitle" class="text-xl font-bold text-green-700 mb-4">بطاقة التلميذ</h3>
+            <form id="studentDetailForm" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <input type="hidden" id="studentIdInput">
+                <!-- قسم الصورة -->
+                <div class="flex flex-col items-center justify-center">
+                    <img id="studentImagePreview" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
+                        alt="صورة التلميذ" class="w-32 h-32 rounded-full object-cover border-4 border-gray-200 mb-2">
+                    <input type="file" id="studentImageInput" class="hidden" accept="image/*">
+                    <div class="flex gap-4">
+                        <label for="studentImageInput"
+                            class="cursor-pointer text-sm text-indigo-600 hover:text-indigo-800">تغيير
+                            الصورة</label>
+                        <button type="button" id="deleteImageBtn" class="text-sm text-red-600 hover:text-red-800">حذف
+                            الصورة</button>
+                    </div>
+                </div>
+                <!-- قسم الحقول وبطاقة التلميذ -->
+                <div class="space-y-4 md:col-span-2">
+                    <!-- تحديد القسم -->
+                    <div class="bg-indigo-50/80 border border-indigo-200 rounded-xl p-3">
+                        <label for="studentModalDeptSelect" class="block text-xs font-bold text-indigo-900 mb-1.5 flex items-center gap-1.5">
+                            <span>🏫</span>
+                            <span>القسم / المستوى الدراسي:</span>
+                            <span class="text-rose-500">*</span>
+                        </label>
+                        <select id="studentModalDeptSelect" required
+                            class="w-full px-3 py-2 border border-indigo-300 rounded-lg bg-white font-bold text-indigo-900 text-sm focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+                            <option value="">-- اختر القسم --</option>
+                        </select>
+                    </div>
+                    <div id="studentFieldsContainer" class="space-y-4"></div>
+                </div>
+                <button type="button" id="addNewFieldBtn"
+                    class="md:col-span-2 mt-2 text-sm text-blue-600 hover:text-blue-800">+ إضافة خانة جديدة</button>
+                <button type="button" id="printCardBtn"
+                    class="hidden md:col-span-3 mt-4 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg w-full">🖨️
+                    طباعة البطاقة</button>
+                <div class="flex justify-end gap-4 mt-6 md:col-span-3">
+                    <button type="button" id="studentModalCancel"
+                        class="px-4 py-2 rounded-lg bg-gray-300 hover:bg-gray-400">إلغاء</button>
+                    <button type="submit" id="studentModalSave"
+                        class="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white">حفظ
+                        المعلومات</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- Modal التواصل عبر واتساب مع أولياء الأمور (WhatsApp) -->
+    <!-- ============================================================ -->
+    <div id="whatsappModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-xs flex justify-center items-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden border border-emerald-100">
+            <!-- الهيدر -->
+            <div class="bg-gradient-to-r from-emerald-600 to-teal-700 text-white px-6 py-4 flex justify-between items-center shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center text-2xl shadow-inner">
+                        💬
+                    </div>
+                    <div>
+                        <h3 class="font-extrabold text-lg leading-tight">التواصل مع أولياء الأمور عبر واتساب</h3>
+                        <p class="text-xs text-emerald-100">إرسال إشعارات النتائج، الغياب، الواجبات، والإعلانات المدرسية</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeWhatsAppModal()" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center font-bold text-lg transition-colors">
+                    ✕
+                </button>
+            </div>
+
+            <!-- شريط التبويبات -->
+            <div class="bg-slate-50 border-b border-slate-200 px-6 pt-3 flex gap-2 shrink-0">
+                <button type="button" onclick="switchWhatsAppTab('single')" data-tab="single" class="wa-tab-btn px-4 py-2.5 rounded-t-xl font-bold text-xs flex items-center gap-2 transition-all bg-emerald-600 text-white shadow-xs">
+                    <span>👤 مراسلة تلميذ واحد</span>
+                </button>
+                <button type="button" onclick="switchWhatsAppTab('batch')" data-tab="batch" class="wa-tab-btn px-4 py-2.5 rounded-t-xl font-bold text-xs flex items-center gap-2 transition-all text-gray-600 hover:bg-gray-100">
+                    <span>👥 إرسال حسب القسم / جماعي</span>
+                </button>
+                <button type="button" onclick="switchWhatsAppTab('templates')" data-tab="templates" class="wa-tab-btn px-4 py-2.5 rounded-t-xl font-bold text-xs flex items-center gap-2 transition-all text-gray-600 hover:bg-gray-100">
+                    <span>📝 إدارة القوالب والوسوم</span>
+                </button>
+            </div>
+
+            <!-- محتوى التبويبات -->
+            <div class="p-6 overflow-y-auto flex-grow space-y-4">
+                <!-- 1. تبويب المراسلة الفردية -->
+                <div id="waPanel_single" class="wa-tab-panel space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- تصفية القسم -->
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">القسم / المستوى:</label>
+                            <select id="waSingleDeptSelect" class="w-full px-3 py-2 border border-gray-300 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500 bg-white">
+                                <option value="">-- كل الأقسام --</option>
+                            </select>
+                        </div>
+                        <!-- اختيار التلميذ -->
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">التلميذ المستهدف:</label>
+                            <select id="waSingleStudentSelect" class="w-full px-3 py-2 border border-gray-300 rounded-xl text-xs font-bold text-gray-900 focus:ring-2 focus:ring-emerald-500 bg-white">
+                                <option value="">-- اختر التلميذ --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- رقم هاتف ولي الأمر -->
+                    <div class="bg-emerald-50/60 border border-emerald-200 rounded-xl p-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                            <label class="text-xs font-bold text-emerald-950 flex items-center gap-1.5">
+                                <span>📱 رقم هاتف ولي الأمر:</span>
+                                <span class="text-[11px] font-normal text-emerald-700">(اكتب مثلاً 0612345678 أو 0712345678)</span>
+                            </label>
+                            <span id="waSinglePhoneFormatted" class="text-[11px] font-mono font-bold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800">
+                                صيغة واتساب: -
+                            </span>
+                        </div>
+                        <input type="text" id="waSinglePhoneInput" dir="ltr" placeholder="06... / 07... / 05..." class="w-full px-3 py-2 text-sm font-mono border border-emerald-300 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white">
+                        <p id="waSinglePhoneMissingAlert" class="hidden text-rose-600 text-xs font-bold mt-1.5 flex items-center gap-1">
+                            ⚠️ تنبيه: رقم هاتف ولي الأمر غير مسجل لهذا التلميذ. يمكنك كتابته هنا وسيحفظ تلقائياً في ملف التلميذ.
+                        </p>
+                    </div>
+
+                    <!-- اختيار القالب وكتابة الرسالة -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-700 mb-1">اختر قالباً جاهزاً:</label>
+                                <select id="waSingleTemplateSelect" onchange="onSingleTemplateSelected()" class="w-full px-3 py-2 border border-gray-300 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500 bg-white">
+                                    <option value="">-- اختر قالباً --</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-700 mb-1">نص الرسالة (يمكنك التعديل وإضافة وسوم):</label>
+                                <textarea id="waSingleMessageText" rows="6" oninput="updateSinglePreview()" placeholder="اكتب نص الرسالة هنا..." class="w-full px-3 py-2 border border-gray-300 rounded-xl text-xs leading-relaxed focus:ring-2 focus:ring-emerald-500"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- المعاينة الحية للرسالة -->
+                        <div>
+                            <label class="block text-xs font-bold text-emerald-800 mb-1 flex items-center gap-1">
+                                <span>👁️ معاينة الرسالة كما ستصل ولي الأمر:</span>
+                            </label>
+                            <div class="h-[212px] p-3.5 bg-emerald-50/40 border border-emerald-200 rounded-xl text-xs leading-relaxed overflow-y-auto text-gray-800 font-sans shadow-inner">
+                                <div id="waSinglePreviewBox" class="space-y-1">
+                                    <span class="text-gray-400 italic">اختر قالباً أو اكتب رسالة لمعاينتها...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- زر الإرسال -->
+                    <div class="flex justify-end gap-3 pt-2">
+                        <button type="button" onclick="closeWhatsAppModal()" class="px-4 py-2 rounded-xl text-xs font-bold bg-gray-100 hover:bg-gray-200 text-gray-700">إلغاء</button>
+                        <button type="button" onclick="sendSingleWhatsApp()" class="px-6 py-2.5 rounded-xl text-xs font-extrabold bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-2 shadow-sm transition-transform active:scale-95">
+                            <span class="text-base">💬</span>
+                            <span>فتح محادثة واتساب وإرسال</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 2. تبويب المراسلة الجماعية / حسب القسم -->
+                <div id="waPanel_batch" class="wa-tab-panel hidden space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+                        <div class="md:col-span-1">
+                            <label class="block text-xs font-bold text-gray-700 mb-1">اختر القسم المستهدف:</label>
+                            <select id="waBatchDeptSelect" onchange="renderBatchRecipientsList()" class="w-full px-3 py-2 border border-gray-300 rounded-xl text-xs font-bold text-gray-900 focus:ring-2 focus:ring-emerald-500 bg-white">
+                                <option value="all">🌟 جميع الأقسام المشتركة</option>
+                            </select>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-bold text-gray-700 mb-1">القالب المعتمد للمراسلة الجماعية:</label>
+                            <select id="waBatchTemplateSelect" onchange="onBatchTemplateSelected()" class="w-full px-3 py-2 border border-gray-300 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500 bg-white">
+                                <option value="">-- اختر قالباً جماعياً --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">نص الرسالة الجماعية (يتم استبدال الوسوم تلقائياً لكل تلميذ):</label>
+                        <textarea id="waBatchMessageText" rows="3" placeholder="اكتب نص الرسالة الجماعية أو اختر قالباً..." class="w-full px-3 py-2 border border-gray-300 rounded-xl text-xs leading-relaxed focus:ring-2 focus:ring-emerald-500"></textarea>
+                    </div>
+
+                    <!-- شريط إجراءات وإحصائيات القائمة -->
+                    <div class="flex flex-wrap justify-between items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                        <div class="flex items-center gap-3">
+                            <label class="flex items-center gap-2 text-xs font-bold text-gray-700 cursor-pointer">
+                                <input type="checkbox" checked onchange="toggleSelectAllBatch(this.checked)" class="accent-emerald-600 w-4 h-4 rounded cursor-pointer">
+                                <span>تحديد الكل</span>
+                            </label>
+                            <span id="waBatchReadyCount" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">0 جاهز للمراسلة</span>
+                            <span id="waBatchMissingCount" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800">0 بدون هاتف</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="exportParentsVCard()" title="تصدير جميع أرقام أولياء الأمور إلى هاتفك لإنشاء مجموعة أو رسالة جماعية" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 flex items-center gap-1.5 transition-colors">
+                                <span>📇 تصدير جهات الاتصال (VCF)</span>
+                            </button>
+                            <button type="button" onclick="startBatchQueue()" class="px-4 py-2 rounded-xl text-xs font-extrabold bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-2 shadow-xs transition-transform active:scale-95">
+                                <span>🚀 بدء طابور الإرسال التتابعي</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- قائمة التلاميذ للمراسلة الجماعية -->
+                    <div id="waBatchRecipientsList" class="space-y-2 max-h-72 overflow-y-auto p-1">
+                        <!-- يتم ملؤها ديناميكياً -->
+                    </div>
+                </div>
+
+                <!-- 3. تبويب إدارة القوالب -->
+                <div id="waPanel_templates" class="wa-tab-panel hidden space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h4 class="font-bold text-sm text-gray-800">قائمة القوالب المتاحة:</h4>
+                        <button type="button" onclick="restoreDefaultTemplates()" class="text-xs font-bold text-amber-700 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded-lg border border-amber-200 transition-colors">
+                            🔄 استعادة القوالب الافتراضية
+                        </button>
+                    </div>
+
+                    <div id="waTemplatesList" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-56 overflow-y-auto p-1">
+                        <!-- يتم ملؤها ديناميكياً -->
+                    </div>
+
+                    <!-- نموذج إضافة / تعديل قالب -->
+                    <div class="border-t border-gray-200 pt-4 space-y-3">
+                        <div class="flex justify-between items-center">
+                            <h4 id="waTplFormTitleHeading" class="font-extrabold text-xs text-emerald-800">➕ إضافة قالب جديد</h4>
+                            <button type="button" id="waTplCancelBtn" onclick="resetTemplateForm()" class="hidden text-xs text-gray-500 hover:text-gray-700 font-bold">إلغاء التعديل</button>
+                        </div>
+                        <input type="hidden" id="waTplFormId">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">عنوان القالب:</label>
+                            <input type="text" id="waTplFormTitle" placeholder="مثال: 📢 تذكير بموعد الامتحان..." class="w-full px-3 py-2 border border-gray-300 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500">
+                        </div>
+
+                        <!-- أزرار إدراج الوسوم الذكية -->
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1.5">الوسوم الذكية (انقر لإدراجها في نص الرسالة):</label>
+                            <div class="flex flex-wrap gap-1.5">
+                                <button type="button" onclick="insertTagIntoTextarea('{اسم_التلميذ}')" class="px-2 py-1 rounded bg-slate-100 hover:bg-emerald-100 text-slate-800 hover:text-emerald-900 text-[11px] font-bold border border-slate-200">+{اسم_التلميذ}</button>
+                                <button type="button" onclick="insertTagIntoTextarea('{القسم}')" class="px-2 py-1 rounded bg-slate-100 hover:bg-emerald-100 text-slate-800 hover:text-emerald-900 text-[11px] font-bold border border-slate-200">+{القسم}</button>
+                                <button type="button" onclick="insertTagIntoTextarea('{المعدل_العام}')" class="px-2 py-1 rounded bg-slate-100 hover:bg-emerald-100 text-slate-800 hover:text-emerald-900 text-[11px] font-bold border border-slate-200">+{المعدل_العام}</button>
+                                <button type="button" onclick="insertTagIntoTextarea('{التقدير}')" class="px-2 py-1 rounded bg-slate-100 hover:bg-emerald-100 text-slate-800 hover:text-emerald-900 text-[11px] font-bold border border-slate-200">+{التقدير}</button>
+                                <button type="button" onclick="insertTagIntoTextarea('{عدد_الغياب}')" class="px-2 py-1 rounded bg-slate-100 hover:bg-emerald-100 text-slate-800 hover:text-emerald-900 text-[11px] font-bold border border-slate-200">+{عدد_الغياب}</button>
+                                <button type="button" onclick="insertTagIntoTextarea('{المؤسسة}')" class="px-2 py-1 rounded bg-slate-100 hover:bg-emerald-100 text-slate-800 hover:text-emerald-900 text-[11px] font-bold border border-slate-200">+{المؤسسة}</button>
+                                <button type="button" onclick="insertTagIntoTextarea('{السنة_الدراسية}')" class="px-2 py-1 rounded bg-slate-100 hover:bg-emerald-100 text-slate-800 hover:text-emerald-900 text-[11px] font-bold border border-slate-200">+{السنة_الدراسية}</button>
+                                <button type="button" onclick="insertTagIntoTextarea('{التاريخ}')" class="px-2 py-1 rounded bg-slate-100 hover:bg-emerald-100 text-slate-800 hover:text-emerald-900 text-[11px] font-bold border border-slate-200">+{التاريخ}</button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">نص قالب الرسالة:</label>
+                            <textarea id="waTplFormText" rows="4" placeholder="اكتب نص الرسالة واستخدم الوسوم أعلاه لتخصيصها لكل تلميذ..." class="w-full px-3 py-2 border border-gray-300 rounded-xl text-xs leading-relaxed focus:ring-2 focus:ring-emerald-500"></textarea>
+                        </div>
+
+                        <div class="flex justify-end gap-2">
+                            <button type="button" onclick="saveTemplateForm()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold px-5 py-2 rounded-xl text-xs shadow-xs">
+                                💾 حفظ القالب
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة طابور الإرسال التتابعي السلس (Step-by-Step Queue Modal) -->
+    <div id="waQueueModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-xs flex justify-center items-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-emerald-100">
+            <div class="bg-gradient-to-r from-emerald-600 to-teal-700 text-white px-5 py-3.5 flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">🚀</span>
+                    <h3 class="font-extrabold text-sm">طابور إرسال رسائل واتساب</h3>
+                </div>
+                <button type="button" onclick="closeQueueModal()" class="text-white hover:text-gray-200 font-bold text-sm">✕ إغلاق</button>
+            </div>
+            <div id="waQueueContent" class="p-5">
+                <!-- يتم ملؤها ديناميكياً خطوة بخطوة -->
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ============================================================ -->
+    <!-- ÙˆØ­Ø¯Ø§Øª Ø§Ù„Ø¬Ø§ÙØ§Ø³ÙƒØ±ÙŠØ¨Øª Ù…Ù‚Ø³Ù…Ø© Ø­Ø³Ø¨ Ø§Ù„ØªØ®ØµØµ ÙˆØ§Ù„Ù…Ø³Ø¤ÙˆÙ„ÙŠØ© -->
+    <!-- ============================================================ -->
+    <!-- 1. Ø¥Ø¹Ø¯Ø§Ø¯Ø§Øª Ø§Ù„Ù†Ø¸Ø§Ù… ÙˆØ§Ù„ØªØ®Ø²ÙŠÙ† Ø§Ù„Ù…Ø­Ù„ÙŠ ÙˆÙ‚Ø§Ø¹Ø¯Ø© Ø§Ù„Ø¨ÙŠØ§Ù†Ø§Øª -->
+    <script src="js/backup-data.js"></script>
+    <script src="js/config.js"></script>
+    <!-- 2. Ø­Ø§Ù„Ø© Ø§Ù„Ù†Ø¸Ø§Ù… Ø§Ù„Ø¹Ø§Ù…Ø© ÙˆØ§Ù„Ø¨ÙŠØ§Ù†Ø§Øª -->
+    <script src="js/state.js"></script>
+    <!-- 3. Ø§Ù„Ù…Ø²Ø§Ù…Ù†Ø© Ø§Ù„Ø³Ø­Ø§Ø¨ÙŠØ© ÙˆÙ‚Ø§Ø¹Ø¯Ø© Ø§Ù„Ø¨ÙŠØ§Ù†Ø§Øª -->
+    <script src="js/firebase-sync.js"></script>
+    <!-- 4. Ù†Ø¸Ø§Ù… Ø§Ù„Ù…ØµØ§Ø¯Ù‚Ø© ÙˆØ¥Ø¯Ø§Ø±Ø© Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù…ÙŠÙ† -->
+    <script src="js/auth.js"></script>
+    <!-- 5. Ø¥Ø¯Ø§Ø±Ø© Ø§Ù„Ø³Ù†ÙˆØ§Øª Ø§Ù„Ø¯Ø±Ø§Ø³ÙŠØ© -->
+    <script src="js/years.js"></script>
+    <!-- 6. Ø¥Ø¯Ø§Ø±Ø© Ø§Ù„Ø£Ù‚Ø³Ø§Ù… ÙˆØ§Ù„Ù…Ø³ØªÙˆÙŠØ§Øª -->
+    <script src="js/departments.js"></script>
+    <!-- 7. Ø¥Ø¯Ø§Ø±Ø© Ø§Ù„ØªÙ„Ø§Ù…ÙŠØ° ÙˆØ¨ÙŠØ§Ù†Ø§ØªÙ‡Ù… -->
+    <script src="js/students.js"></script>
+    <!-- 8. Ø¥Ø¯Ø§Ø±Ø© Ø¨Ù†ÙˆØ¯ Ø§Ù„ØªÙ‚ÙŠÙŠÙ… ÙˆØ§Ù„Ø£Ù†Ø´Ø·Ø© ÙˆØ§Ù„Ø³Ù„ÙˆÙƒ -->
+    <script src="js/activities.js"></script>
+    <!-- 9. Ø¥Ø¯Ø§Ø±Ø© Ø§Ù„Ù…Ù„Ø§Ø­Ø¸Ø§Øª Ø§Ù„Ø¹Ø§Ù…Ø© ÙˆØ§Ù„ØªÙ„Ù‚Ø§Ø¦ÙŠØ© -->
+    <script src="js/observations.js"></script>
+    <!-- 10. Ø¥Ø¯Ø§Ø±Ø© Ø§Ù„Ø¯ÙˆØ±Ø§Øª Ø§Ù„Ø¯Ø±Ø§Ø³ÙŠØ© -->
+    <script src="js/sessions.js"></script>
+    <!-- 11. Ø§Ù„Ù†ØªÙŠØ¬Ø© Ø§Ù„Ù…Ø¯Ø±Ø³ÙŠØ© ÙˆØ­Ø³Ø§Ø¨ Ø§Ù„Ù…Ø¹Ø¯Ù„Ø§Øª -->
+    <script src="js/report-card.js"></script>
+    <!-- 12. Ø¥Ø¯Ø§Ø±Ø© Ø§Ù„ØµÙˆØ± Ø§Ù„Ù…Ù„Ø­Ù‚Ø© Ø¨Ø§Ù„Ù†ØªÙŠØ¬Ø© -->
+    <script src="js/images.js"></script>
+    <!-- 13. ØªØ±ØªÙŠØ¨ Ø§Ù„Ù…Ø±Ø§ÙƒØ² ÙˆØ§Ù„Ø£ÙˆØ§Ø¦Ù„ -->
+    <script src="js/ranking.js"></script>
+    <!-- 14. ØªØ³Ø¬ÙŠÙ„ ÙˆØªØªØ¨Ø¹ Ø§Ù„ØºÙŠØ§Ø¨ -->
+    <script src="js/absence.js"></script>
+    <!-- 15. Ø£Ø¯Ø§Ø¡ Ø§Ù„ÙˆØ§Ø¬Ø¨Ø§Øª Ø§Ù„Ø´Ù‡Ø±ÙŠØ© ÙˆØ§Ù„Ø±Ø³ÙˆÙ… -->
+    <script src="js/performance.js"></script>
+    <!-- 16. ÙˆØ¸Ø§Ø¦Ù Ø§Ù„Ø·Ø¨Ø§Ø¹Ø© -->
+    <script src="js/print.js"></script>
+    <!-- 17. تصدير واستيراد البيانات والنسخ الاحتياطي -->
+    <script src="js/backup.js"></script>
+    <!-- 18. نظام التواصل عبر واتساب مع أولياء الأمور -->
+    <script src="js/whatsapp.js"></script>
+    <!-- 19. نقطة الانطلاق والتنقل العام -->
+    <script src="js/app.js"></script>
+
+    <!-- دوال التحكم في الشريط الجانبي والتنقل المتجاوب لجميع الشاشات -->
+    <script>
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            if (!sidebar || !backdrop) return;
+            const isClosed = sidebar.classList.contains('translate-x-full');
+            if (isClosed) {
+                sidebar.classList.remove('translate-x-full');
+                backdrop.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('translate-x-full');
+                backdrop.classList.add('hidden');
+            }
+        }
+
+        function switchToHomePage() {
+            const homePage = document.getElementById('homePage');
+            const settingsPage = document.getElementById('settingsPage');
+            const performancePage = document.getElementById('performancePage');
+            const absencePage = document.getElementById('absencePage');
+            const navHomeBtn = document.getElementById('navHomeBtn');
+            const openSettings = document.getElementById('openSettings');
+            const monthlyPerformanceCard = document.getElementById('monthlyPerformanceCard');
+            const absenceCard = document.getElementById('absenceCard');
+            const topBarPageTitle = document.getElementById('topBarPageTitle');
+
+            if (homePage) homePage.classList.remove('hidden');
+            if (settingsPage) settingsPage.classList.add('hidden');
+            if (performancePage) performancePage.classList.add('hidden');
+            if (absencePage) absencePage.classList.add('hidden');
+
+            if (navHomeBtn) navHomeBtn.classList.add('active');
+            if (openSettings) openSettings.classList.remove('active');
+            if (monthlyPerformanceCard) monthlyPerformanceCard.classList.remove('active');
+            if (absenceCard) absenceCard.classList.remove('active');
+            if (topBarPageTitle) topBarPageTitle.textContent = 'لوحة التحكم والنتائج';
+
+            if (window.innerWidth < 1024) {
+                const sidebar = document.getElementById('sidebar');
+                const backdrop = document.getElementById('sidebarBackdrop');
+                if (sidebar) sidebar.classList.add('translate-x-full');
+                if (backdrop) backdrop.classList.add('hidden');
+            }
+        }
+
+        function switchToPerformancePage() {
+            const homePage = document.getElementById('homePage');
+            const settingsPage = document.getElementById('settingsPage');
+            const performancePage = document.getElementById('performancePage');
+            const absencePage = document.getElementById('absencePage');
+            const navHomeBtn = document.getElementById('navHomeBtn');
+            const openSettings = document.getElementById('openSettings');
+            const monthlyPerformanceCard = document.getElementById('monthlyPerformanceCard');
+            const absenceCard = document.getElementById('absenceCard');
+            const topBarPageTitle = document.getElementById('topBarPageTitle');
+
+            if (homePage) homePage.classList.add('hidden');
+            if (settingsPage) settingsPage.classList.add('hidden');
+            if (performancePage) performancePage.classList.remove('hidden');
+            if (absencePage) absencePage.classList.add('hidden');
+
+            if (navHomeBtn) navHomeBtn.classList.remove('active');
+            if (openSettings) openSettings.classList.remove('active');
+            if (monthlyPerformanceCard) monthlyPerformanceCard.classList.add('active');
+            if (absenceCard) absenceCard.classList.remove('active');
+            if (topBarPageTitle) topBarPageTitle.textContent = 'الجدول المتقاطع لتتبع أداء الواجبات والشهور';
+
+            if (window.innerWidth < 1024) {
+                const sidebar = document.getElementById('sidebar');
+                const backdrop = document.getElementById('sidebarBackdrop');
+                if (sidebar) sidebar.classList.add('translate-x-full');
+                if (backdrop) backdrop.classList.add('hidden');
+            }
+
+            const deptSelect = document.getElementById('perfDeptSelect');
+            if (deptSelect && (deptSelect.options.length <= 1 || !deptSelect.value)) {
+                deptSelect.innerHTML = '<option value="">-- اختر المستوى / القسم --</option>';
+                if (Array.isArray(departments)) {
+                    departments.forEach(d => deptSelect.appendChild(new Option(d.name, d.id)));
+                }
+            }
+
+            if (typeof renderDeptChips === 'function') renderDeptChips();
+            if (typeof setPerfFilter === 'function') setPerfFilter('all');
+            if (typeof renderPerformanceList === 'function') renderPerformanceList();
+        }
+
+        function switchToAbsencePage() {
+            const homePage = document.getElementById('homePage');
+            const settingsPage = document.getElementById('settingsPage');
+            const performancePage = document.getElementById('performancePage');
+            const absencePage = document.getElementById('absencePage');
+            const navHomeBtn = document.getElementById('navHomeBtn');
+            const openSettings = document.getElementById('openSettings');
+            const monthlyPerformanceCard = document.getElementById('monthlyPerformanceCard');
+            const absenceCard = document.getElementById('absenceCard');
+            const topBarPageTitle = document.getElementById('topBarPageTitle');
+
+            if (homePage) homePage.classList.add('hidden');
+            if (settingsPage) settingsPage.classList.add('hidden');
+            if (performancePage) performancePage.classList.add('hidden');
+            if (absencePage) absencePage.classList.remove('hidden');
+
+            if (navHomeBtn) navHomeBtn.classList.remove('active');
+            if (openSettings) openSettings.classList.remove('active');
+            if (monthlyPerformanceCard) monthlyPerformanceCard.classList.remove('active');
+            if (absenceCard) absenceCard.classList.add('active');
+            if (topBarPageTitle) topBarPageTitle.textContent = 'تسجيل وتتبع غياب التلاميذ';
+
+            if (window.innerWidth < 1024) {
+                const sidebar = document.getElementById('sidebar');
+                const backdrop = document.getElementById('sidebarBackdrop');
+                if (sidebar) sidebar.classList.add('translate-x-full');
+                if (backdrop) backdrop.classList.add('hidden');
+            }
+
+            if (typeof initAbsencePage === 'function') {
+                initAbsencePage();
+            }
+        }
+
+        window.switchToHomePage = switchToHomePage;
+        window.switchToPerformancePage = switchToPerformancePage;
+        window.switchToAbsencePage = switchToAbsencePage;
+    </script>
+</body>
+
+</html>
